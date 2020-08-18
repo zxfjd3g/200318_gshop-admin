@@ -4,6 +4,7 @@ export {default as role} from './acl/role'
 export {default as permission} from './acl/permission'
 export {default as category} from './category'
 export {default as clientUser} from './clientUser'
+export {default as trademark} from './product/trademark'
 
 
 /* 
@@ -15,6 +16,7 @@ export {default as clientUser} from './clientUser'
   permission,
   category,
   clientUser,
-  clientUser
+  clientUser,
+  trademark
 }
 */
