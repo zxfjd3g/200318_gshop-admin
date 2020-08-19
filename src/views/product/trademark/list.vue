@@ -69,6 +69,7 @@
             :before-upload="beforeAvatarUpload">
             <img v-if="form.logoUrl" :src="form.logoUrl" class="avatar">
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过50kb</div>
           </el-upload>
         </el-form-item>
       </el-form>
@@ -196,7 +197,8 @@ export default {
       // 保存上传成功的图片url
       this.form.logoUrl = res.data
       // 手动去对当前图片进行校验
-      this.$refs.ruleForm.validateField('logoUrl')
+      // this.$refs.ruleForm.validateField('logoUrl')
+      this.$refs.ruleForm.clearValidate('logoUrl')
     },
             
     /* 
@@ -205,7 +207,7 @@ export default {
     */
     beforeAvatarUpload(file) {
       const isJPGOrPNG = file.type === 'image/jpeg' || file.type === 'image/png';
-      const isLt50KB = file.size / 1024 / 1024 < 10;
+      const isLt50KB = file.size / 1024 < 50;
 
       if (!isJPGOrPNG) {
         this.$message.error('上传头像图片只能是 JPG/PNG 格式!');
