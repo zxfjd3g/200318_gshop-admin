@@ -7,6 +7,7 @@
       tmName:"华为"
      -->
     <el-table
+      v-loading="loading"
       style="margin: 20px 0"
       border
       :data="trademarks"
@@ -97,18 +98,19 @@ export default {
         logoUrl: '',
       },
 
-       rules: {
-          /* 使用内置的校验规则 */
-          tmName: [
-            { required: true, message: '请输入活动名称' },
-            // { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
-            /* 使用自定义校验 */
-            { validator: this.validateTmName, trigger: 'blur' }
-          ],
-          logoUrl: [
-            { required: true, message: '必须指定图片', trigger: 'change'}
-          ],
-        }
+      rules: {
+        /* 使用内置的校验规则 */
+        tmName: [
+          { required: true, message: '请输入活动名称' },
+          // { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+          /* 使用自定义校验 */
+          { validator: this.validateTmName, trigger: 'blur' }
+        ],
+        logoUrl: [
+          { required: true, message: '必须指定图片', trigger: 'change'}
+        ],
+      },
+      loading: false, // 是否显示loading
     }
   },
 
@@ -256,7 +258,11 @@ export default {
     async getTrademarks (page) {
       this.page = page
       try {
+        // 请求获取列表前显示loading
+        this.loading = true
         const result = await this.$API.trademark.getPageList(page, this.limit)
+        // 请求获取列表成功后隐藏loading
+        this.loading = false
         const {records, total} = result.data
         this.trademarks = records
         this.total = total
