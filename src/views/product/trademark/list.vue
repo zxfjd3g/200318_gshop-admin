@@ -49,15 +49,20 @@
       @current-change="getTrademarks">
     </el-pagination>
 
-    <el-dialog title="添加" :visible.sync="dialogFormVisible">
+    <el-dialog :title="form.id ? '修改' : '添加'" :visible.sync="dialogFormVisible">
       <el-form :model="form" style="width: 80%">
         <el-form-item label="品牌名称" label-width="120px">
           <el-input v-model="form.tmName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="品牌LOGO" label-width="120px">
+          <!-- 
+            action: 处理上传图片的接口地址
+            on-success: 指定上传成功的回调函数
+            before-upload: 指定准备上传前的回调, 如果返回false不发请求
+           -->
           <el-upload
             class="avatar-uploader"
-            action="https://jsonplaceholder.typicode.com/posts/"
+            :action="$BASE_API + '/admin/product/fileUpload'"
             :show-file-list="false"
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload">
@@ -68,7 +73,7 @@
       </el-form>
       <div slot="footer"> <!-- 使用命名插槽 -->
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="addOrUpdate">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -97,21 +102,50 @@ export default {
   },
 
   methods: {
+    /* 
+    添加或更新品牌
+    */
+    async addOrUpdate () {
 
-    handleAvatarSuccess(res, file) {
-      this.imageUrl = URL.createObjectURL(file.raw);
+      // 准备数据
+      const trademark = this.form
+      // 提交ajax请求
+      await this.$API.trademark.save(trademark)
+      // 成功了, ....
+      // 关闭对话
+      this.dialogFormVisible = false
+      // 提示成功
+      this.$message.success(`${trademark.id?'修改':'添加'}成功`)
+      // 获取列表显示
+        // 修改显示当前页, 添加显示第1页
+      this.getTrademarks(trademark.id ? this.page : 1)
     },
+    
+    /* 
+    on-success: 指定上传成功的回调函数
+    res: 响应体对象
+    */
+    handleAvatarSuccess(res, file) {
+      console.log('handleAvatarSuccess', res)
+      // 保存上传成功的图片url
+      this.form.logoUrl = res.data
+    },
+            
+    /* 
+    before-upload: 指定准备上传前的回调, 如果返回false不发请求
+    限制图片类型和大小
+    */
     beforeAvatarUpload(file) {
-      const isJPG = file.type === 'image/jpeg';
-      const isLt2M = file.size / 1024 / 1024 < 2;
+      const isJPGOrPNG = file.type === 'image/jpeg' || file.type === 'image/png';
+      const isLt50KB = file.size / 1024 / 1024 < 10;
 
-      if (!isJPG) {
-        this.$message.error('上传头像图片只能是 JPG 格式!');
+      if (!isJPGOrPNG) {
+        this.$message.error('上传头像图片只能是 JPG/PNG 格式!');
       }
-      if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!');
+      if (!isLt50KB) {
+        this.$message.error('上传头像图片大小不能超过 50KB!');
       }
-      return isJPG && isLt2M;
+      return isJPGOrPNG && isLt50KB; // 只有2个条件都满足才返回true, 提交上传的请求
     },
 
     /* 
@@ -120,7 +154,8 @@ export default {
     showUpdate (trademark) {
 
       // 保存trademark
-      this.form = trademark
+      // this.form = trademark  // 2个引用变量指向同一个对象的问题
+      this.form = {...trademark} // 生成一个拷贝对象给form
       // 显示dialog
       this.dialogFormVisible = true
     },

@@ -46,6 +46,9 @@ export default {
     return request.post('/admin/product/baseTrademark/save', trademark)
   },
 
+
+
+  
   /* 
   更新品牌
   PUT /admin/product/baseTrademark/update
