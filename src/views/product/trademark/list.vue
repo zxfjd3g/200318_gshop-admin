@@ -33,7 +33,7 @@
           label="操作">
           <template v-slot="{row, $index}">
             <el-button type="warning" icon="el-icon-edit" size="small" @click="showUpdate(row)">修改</el-button>
-            <el-button type="danger" icon="el-icon-delete" size="small">删除</el-button>
+            <el-button type="danger" icon="el-icon-delete" size="small" @click="deleteTradmark(row)">删除</el-button>
           </template>
         </el-table-column>
     </el-table>
@@ -50,11 +50,12 @@
     </el-pagination>
 
     <el-dialog :title="form.id ? '修改' : '添加'" :visible.sync="dialogFormVisible">
-      <el-form :model="form" style="width: 80%">
-        <el-form-item label="品牌名称" label-width="120px">
+      
+      <el-form :model="form" :rules="rules" ref="ruleForm" style="width: 80%">
+        <el-form-item label="品牌名称" label-width="120px" prop="tmName">
           <el-input v-model="form.tmName" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="品牌LOGO" label-width="120px">
+        <el-form-item label="品牌LOGO" label-width="120px" prop="logoUrl">
           <!-- 
             action: 处理上传图片的接口地址
             on-success: 指定上传成功的回调函数
@@ -94,6 +95,19 @@ export default {
         tmName: '',
         logoUrl: '',
       },
+
+       rules: {
+          /* 使用内置的校验规则 */
+          tmName: [
+            { required: true, message: '请输入活动名称' },
+            // { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+            /* 使用自定义校验 */
+            { validator: this.validateTmName, trigger: 'blur' }
+          ],
+          logoUrl: [
+            { required: true, message: '必须指定图片', trigger: 'change'}
+          ],
+        }
     }
   },
 
@@ -102,23 +116,75 @@ export default {
   },
 
   methods: {
+
+    /* 
+    自定义校验规则函数
+    value: 输入的值
+    callback: 用来指定是否通过的函数, 当指定了提示信息时代表不通过
+
+    长度3到5位
+    */
+    validateTmName (rule, value, callback) {
+      if (value.length<3 || value.length>5) {
+        callback('长度在 3 到 5 个字符') // 没有通过
+      } else {
+        callback() // 通过了
+      }
+    }, 
+
+    /* 
+    删除指定品牌
+    */
+    deleteTradmark (trademark) {
+      // 显示确认
+      this.$confirm(`确定删除 ${trademark.tmName} 吗?`, '提示', {
+        type: 'warning'
+      }).then(async () => { // 点击确定
+        // 发送删除的请求
+        await this.$API.trademark.remove(trademark.id)
+        // 成功后, 提示成功, 重新显示列表
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+        
+        // 确定是当前页还是上一页
+        // 当前页数量大于1 或者 如果只有一条数据了, 获取当前页, 否则获取上一页
+        const page = (this.trademarks.length>1 || this.total===1) ? this.page : this.page -1
+        
+        this.getTrademarks(page)
+        
+      }).catch(() => { // 点击取消
+        this.$message.info('已取消删除') 
+      })
+    },
+
     /* 
     添加或更新品牌
     */
-    async addOrUpdate () {
+    addOrUpdate () {
 
-      // 准备数据
-      const trademark = this.form
-      // 提交ajax请求
-      await this.$API.trademark.save(trademark)
-      // 成功了, ....
-      // 关闭对话
-      this.dialogFormVisible = false
-      // 提示成功
-      this.$message.success(`${trademark.id?'修改':'添加'}成功`)
-      // 获取列表显示
-        // 修改显示当前页, 添加显示第1页
-      this.getTrademarks(trademark.id ? this.page : 1)
+      // 进行表单的统一校验
+      this.$refs.ruleForm.validate(async (valid) => { // 校验完成时自动调用
+        if (valid) { // 全部通过
+          // 准备数据
+          const trademark = this.form
+          // 提交ajax请求
+          await this.$API.trademark.save(trademark)
+          // 成功了, ....
+          // 关闭对话
+          this.dialogFormVisible = false
+          // 提示成功
+          this.$message.success(`${trademark.id?'修改':'添加'}成功`)
+          // 获取列表显示
+            // 修改显示当前页, 添加显示第1页
+          this.getTrademarks(trademark.id ? this.page : 1)
+        } else {
+          console.log('没通过')
+        }
+      })
+
+      
     },
     
     /* 
@@ -129,6 +195,8 @@ export default {
       console.log('handleAvatarSuccess', res)
       // 保存上传成功的图片url
       this.form.logoUrl = res.data
+      // 手动去对当前图片进行校验
+      this.$refs.ruleForm.validateField('logoUrl')
     },
             
     /* 
@@ -170,7 +238,13 @@ export default {
         logoUrl: '',
       }
       // 显示dialog
-      this.dialogFormVisible = true
+      this.dialogFormVisible = true  // 此时界面还没有更新(显示)
+
+      // 移除校验的错误提示信息  ==> 必须在dialog显示之后执行才会有效果
+      this.$nextTick(() => {
+        this.$refs.ruleForm.clearValidate()
+      })
+      
     },
 
     /* 
