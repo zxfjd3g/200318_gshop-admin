@@ -22,10 +22,10 @@ export default {
 
   async mounted () {
     // 为了方便测试
-    this.category1Id = 2
-    this.category2Id = 13
-    this.category3Id = 61
-    this.getAttrs()
+    // this.category1Id = 2
+    // this.category2Id = 13
+    // this.category3Id = 61
+    // this.getAttrs()
   },
 
   methods: {
