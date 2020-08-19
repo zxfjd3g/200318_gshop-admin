@@ -198,6 +198,7 @@ export default {
       this.form.logoUrl = res.data
       // 手动去对当前图片进行校验
       // this.$refs.ruleForm.validateField('logoUrl')
+      // 手动清除错误提示信息
       this.$refs.ruleForm.clearValidate('logoUrl')
     },
             
