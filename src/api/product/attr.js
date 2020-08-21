@@ -24,8 +24,8 @@ export default {
   添加和更新属性
   POST /admin/product/saveAttrInfo
   */
-  saveAttr (attrInfo) {
-    return request.post('/admin/product/saveAttrInfo', attrInfo)
+  saveAttr (attr) {
+    return request.post('/admin/product/saveAttrInfo', attr)
   },
 
   /* 

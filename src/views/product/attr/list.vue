@@ -61,7 +61,7 @@
           </el-table-column>
         </el-table>
 
-        <el-button type="primary" :disabled="!attr.attrName || attr.attrValueList.length===0">保存</el-button>
+        <el-button type="primary" :disabled="!attr.attrName || attr.attrValueList.length===0" @click="save">保存</el-button>
         <el-button @click="isShowList = true">取消</el-button>
 
       </div>
@@ -106,6 +106,48 @@ export default {
   },
 
   methods: {
+
+    /* 
+    添加/更新属性
+    */
+    async save () {
+      // 准备数据
+      const {attr} = this
+      // 需要对收集的数据进行整理的操作(整理数据)
+      attr.categoryId = this.category3Id
+      attr.categoryLevel = 3
+
+      // 在提交请求前需要对收集的参数数据进行特定整理(处理)
+      // 1. 将属性值名称为空串的属性值过滤掉
+      attr.attrValueList = attr.attrValueList.filter(value => {
+        if (value.valueName) {
+          // 2. 删除属性值对象中的edit属性
+          delete value.edit  
+          return true
+        }
+        return false
+        // delete value.edit
+        // return value.valueName
+      })
+      console.log('----', attr.attrValueList.length)
+      // 如果一个属性值都没有, 没有必要发请求
+      if (attr.attrValueList.length===0) {
+        this.$message.error('必须至少指定一个属性值')
+        return
+      }
+
+      
+      attr.attrValueList.forEach(value => delete value.edit)
+
+
+      // 提交添加/更新属性的请求
+      await this.$API.attr.saveAttr(attr)
+      // 成功后...
+      // 提示成功 回到列表页面, 获取新列表显示
+      this.$message.success('保存属性成功啦!!!')
+      this.isShowList = true
+      this.getAttrs()
+    },
 
     /* 
     从编程模式 ==> 查看模式
@@ -195,7 +237,9 @@ export default {
       // 重置attr
       this.attr = {
         attrName: '',
-        attrValueList: []
+        attrValueList: [],
+        // categoryId: this.category3Id,
+        // categoryLevel: 3
       }
       // 显示添加界面
       this.isShowList = false
