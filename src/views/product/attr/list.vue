@@ -1,11 +1,12 @@
 <template>
   <div>
     <el-card style="margin-bottom:20px">
-      <category-selector @categoryChange="handleCategoryChange"></category-selector>
+      <!-- this.$refs.cs.disabled = true/false -->
+      <category-selector @categoryChange="handleCategoryChange" ref="cs"></category-selector>
     </el-card>
     <el-card>
       <div v-show="isShowList">
-        <el-button type="primary" icon="el-icon-plus" @click="showAdd">添加属性</el-button>
+        <el-button type="primary" icon="el-icon-plus" @click="showAdd" :disabled="!category3Id">添加属性</el-button>
         <el-table
           v-loading="loading"
           style="margin-top: 20px"
@@ -35,16 +36,16 @@
           </el-form-item>
         </el-form>
 
-        <el-button type="primary" icon="el-icon-plus" @click="addAttrValue">添加属性值</el-button>
+        <el-button type="primary" icon="el-icon-plus" @click="addAttrValue" :disabled="!attr.attrName">添加属性值</el-button>
         <el-button>取消</el-button>
 
         <el-table border style="margin: 20px 0" :data="attr.attrValueList">
           <el-table-column type="index" label="序号" width="80" align="center"></el-table-column>
           <el-table-column label="属性值名称">
             <template v-slot="{row, $index}">  <!-- row: 当前行的属性值对象 -->
-              <el-input :ref="$index" v-if="row.edit" v-model="row.valueName" 
+              <el-input :ref="$index" v-if="row.edit" v-model="row.valueName" size="small"
                 @blur="toList(row, $index)" @keyup.enter.native="toList(row, $index)"></el-input>
-              <span v-else @click="toEdit(row, $index)">{{row.valueName}}</span>
+              <span v-else @click="toEdit(row, $index)" style="display: inline-block; width: 100%">{{row.valueName}}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作">
@@ -60,7 +61,7 @@
           </el-table-column>
         </el-table>
 
-        <el-button type="primary">保存</el-button>
+        <el-button type="primary" :disabled="!attr.attrName || attr.attrValueList.length===0">保存</el-button>
         <el-button @click="isShowList = true">取消</el-button>
 
       </div>
@@ -69,6 +70,7 @@
 </template>
 
 <script>
+import cloneDeep from 'lodash/cloneDeep'
 export default {
   name: 'AttrList',
 
@@ -87,12 +89,20 @@ export default {
     }
   },
 
+
+  watch: {
+    isShowList (value) {
+      // 更新cs的可操作性
+      this.$refs.cs.disabled = !value
+    } 
+  },
+
   async mounted () {
     // 为了方便测试
-    this.category1Id = 2
-    this.category2Id = 13
-    this.category3Id = 61
-    this.getAttrs()
+    // this.category1Id = 2
+    // this.category2Id = 13
+    // this.category3Id = 61
+    // this.getAttrs()
   },
 
   methods: {
@@ -162,7 +172,18 @@ export default {
     */
     showUpdate (attr) {
       // 保存当前属性对象
-      this.attr = attr
+      // this.attr = attr  // 问题: 属性名称修改不能取消
+     
+      // this.attr = {...attr} // 使用浅拷贝解决上面的问题 
+        //问题: 修改属性值不能取消
+        // 原因: 列表与修改界面共享同个属性值数组(原因: 使用的是浅拷贝)
+        // 解决: 使用深拷贝
+      // 方法1: 使用JOSN进行深拷贝
+      // const cloneAttr = JSON.parse(JSON.stringify(attr))
+      // 方法2: 使用lodash库
+      const cloneAttr = cloneDeep(attr)
+      this.attr = cloneAttr
+
       // 显示修改界面
       this.isShowList = false
     },
@@ -183,8 +204,15 @@ export default {
     handleCategoryChange ({categoryId, level}) {
       if (level===1) {
         this.category1Id = categoryId
+        // 重置二级和三级相关数据
+        this.category2Id = ''
+        this.category3Id = ''
+        this.attrs = []
       } else if (level===2) { 
         this.category2Id = categoryId
+        // 重置三级相关数据
+        this.category3Id = ''
+        this.attrs = []
       } else { // level=3
         this.category3Id = categoryId
         // 异步获取属性列表

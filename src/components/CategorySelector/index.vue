@@ -1,19 +1,19 @@
 <template>
   <el-form inline>
     <el-form-item label="一级分类">
-      <el-select v-model="category1Id" placeholder="请选择" @change="handleCategory1Change">
+      <el-select v-model="category1Id" placeholder="请选择" @change="handleCategory1Change" :disabled="disabled">
         <el-option :label="c1.name" :value="c1.id" v-for="c1 in category1List" :key="c1.id"></el-option>
       </el-select>
     </el-form-item>
 
     <el-form-item label="二级分类">
-      <el-select v-model="category2Id" placeholder="请选择" @change="handleCategory2Change">
+      <el-select v-model="category2Id" placeholder="请选择" @change="handleCategory2Change" :disabled="disabled">
         <el-option :label="c2.name" :value="c2.id" v-for="c2 in category2List" :key="c2.id"></el-option>
       </el-select>
     </el-form-item>
 
     <el-form-item label="三级分类">
-      <el-select v-model="category3Id" placeholder="请选择" @change="handleCategory3Change">
+      <el-select v-model="category3Id" placeholder="请选择" @change="handleCategory3Change" :disabled="disabled">
         <el-option :label="c3.name" :value="c3.id" v-for="c3 in category3List" :key="c3.id"></el-option>
       </el-select>
     </el-form-item>
@@ -34,6 +34,8 @@ export default {
       category1List: [], // 一级分类列表
       category2List: [], // 二级分类列表
       category3List: [], // 三级分类列表
+
+      disabled: false, // 下拉列表是否不可操作, 默认是可操作的
     }
   },
 
