@@ -35,12 +35,17 @@
           </el-form-item>
         </el-form>
 
-        <el-button type="primary" icon="el-icon-plus">添加属性值</el-button>
+        <el-button type="primary" icon="el-icon-plus" @click="addAttrValue">添加属性值</el-button>
         <el-button>取消</el-button>
 
         <el-table border style="margin: 20px 0" :data="attr.attrValueList">
           <el-table-column type="index" label="序号" width="80" align="center"></el-table-column>
-          <el-table-column label="属性值名称" prop="valueName"></el-table-column>
+          <el-table-column label="属性值名称">
+            <template v-slot="{row, $index}">  <!-- row: 当前行的属性值对象 -->
+              <el-input v-if="row.edit" v-model="row.valueName" @blur="toList(row)" @keyup.enter.native="toList(row)"></el-input>
+              <span v-else @click="toEdit(row)">{{row.valueName}}</span>
+            </template>
+          </el-table-column>
           <el-table-column label="操作">
             <template v-slot="{row, $index}">
               <hint-button title="删除" icon="el-icon-delete" size="mini" type="danger"></hint-button>
@@ -84,6 +89,51 @@ export default {
   },
 
   methods: {
+
+    /* 
+    从编程模式 ==> 查看模式
+    */
+    toList (attrValue) {
+      if (!attrValue.edit) return  // 避免2个事件重复处理
+      const valueName = attrValue.valueName
+      // 1. 如果输入的是空串, 还是编辑模式
+      if (valueName==='') {
+        this.$message.warning('必须输入')
+        return
+      } 
+      // 2. 如果与其它重复了, 还是编辑模式
+      const isRepeat = this.attr.attrValueList.filter(value => value.valueName===valueName).length===2
+      if (isRepeat) {
+        this.$message.warning('不能与其它名称重复')
+        return
+      }
+
+      console.log('toList')
+      attrValue.edit = false
+    }, 
+
+    /* 
+    添加属性值
+    */
+    addAttrValue () {
+      // 给属性值列表添加一个属性值对象
+      this.attr.attrValueList.push({
+        attrId: this.attr.id,
+        valueName: '',
+        edit: true
+      })
+    },
+
+    /* 
+    从查看模式==>编程模式
+    */
+    toEdit (attrValue) {
+      if (attrValue.hasOwnProperty('edit')) { // 对象自身上是否有edit属性
+        attrValue.edit = true
+      } else {
+        this.$set(attrValue, 'edit', true)  // 此时不能用.来添加, 否则不是响应式的
+      }
+    },
 
     /* 
     显示修改界面
