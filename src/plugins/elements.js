@@ -1,4 +1,10 @@
-import Vue from 'vue';
+import Vue from 'vue'
+// 完整引入
+// import ElementUI from 'element-ui'
+// Vue.use(ElementUI)
+// import 'element-ui/lib/theme-chalk/index.css'
+
+// 按需引入
 import {
   Pagination,
   Dialog,
@@ -32,7 +38,7 @@ import {
   Message,
   Notification,
   Drawer,
-  Popconfirm,
+  Popconfirm,  // 会自动加载打包对应的css文件
   DropdownMenu,
   DropdownItem,
 
@@ -49,7 +55,7 @@ import {
   // ButtonGroup,
   // TimeSelect,
   // TimePicker,
-  // Popover,
+  Popover,
   // Tooltip,
   // Tabs,
   // TabPane,
@@ -136,7 +142,7 @@ Vue.use(RadioButton);
 // Vue.use(ButtonGroup);
 // Vue.use(TimeSelect);
 // Vue.use(TimePicker);
-// Vue.use(Popover);
+Vue.use(Popover);
 // Vue.use(Tooltip);
 // Vue.use(Tabs);
 // Vue.use(TabPane);

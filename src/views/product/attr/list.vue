@@ -42,13 +42,20 @@
           <el-table-column type="index" label="序号" width="80" align="center"></el-table-column>
           <el-table-column label="属性值名称">
             <template v-slot="{row, $index}">  <!-- row: 当前行的属性值对象 -->
-              <el-input v-if="row.edit" v-model="row.valueName" @blur="toList(row)" @keyup.enter.native="toList(row)"></el-input>
-              <span v-else @click="toEdit(row)">{{row.valueName}}</span>
+              <el-input :ref="$index" v-if="row.edit" v-model="row.valueName" 
+                @blur="toList(row, $index)" @keyup.enter.native="toList(row, $index)"></el-input>
+              <span v-else @click="toEdit(row, $index)">{{row.valueName}}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作">
             <template v-slot="{row, $index}">
-              <hint-button title="删除" icon="el-icon-delete" size="mini" type="danger"></hint-button>
+              <el-popconfirm
+                :title="`确定删除 ${row.valueName} 吗?`"
+                @onConfirm="attr.attrValueList.splice($index, 1)"
+              >
+                <!-- <el-button slot="reference">删除</el-button> -->
+                <hint-button slot="reference" title="删除" icon="el-icon-delete" size="mini" type="danger"></hint-button>
+              </el-popconfirm>
             </template>
           </el-table-column>
         </el-table>
@@ -93,17 +100,19 @@ export default {
     /* 
     从编程模式 ==> 查看模式
     */
-    toList (attrValue) {
+    toList (attrValue, index) {
       if (!attrValue.edit) return  // 避免2个事件重复处理
       const valueName = attrValue.valueName
       // 1. 如果输入的是空串, 还是编辑模式
       if (valueName==='') {
+        this.$refs[index].focus()
         this.$message.warning('必须输入')
         return
       } 
       // 2. 如果与其它重复了, 还是编辑模式
       const isRepeat = this.attr.attrValueList.filter(value => value.valueName===valueName).length===2
       if (isRepeat) {
+          this.$refs[index].focus()
         this.$message.warning('不能与其它名称重复')
         return
       }
@@ -122,17 +131,30 @@ export default {
         valueName: '',
         edit: true
       })
+
+      // 等到input显示(界面更新)后才获取焦点
+      this.$nextTick(() => {
+        // 最后一个input
+        this.$refs[this.attr.attrValueList.length-1].focus()
+      })
     },
 
     /* 
     从查看模式==>编程模式
     */
-    toEdit (attrValue) {
+    toEdit (attrValue, index) {
       if (attrValue.hasOwnProperty('edit')) { // 对象自身上是否有edit属性
         attrValue.edit = true
       } else {
         this.$set(attrValue, 'edit', true)  // 此时不能用.来添加, 否则不是响应式的
       }
+
+      // 让对应的input获得焦点
+      // 通过调用input组件对象的focus(), 但必须在显示之后
+      // 必须使用$nextTick(), 延迟到input显示之后才执行focus()
+      this.$nextTick(() => {
+        this.$refs[index].focus()
+      })
     },
 
     /* 
