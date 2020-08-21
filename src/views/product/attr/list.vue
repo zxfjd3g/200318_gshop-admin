@@ -4,27 +4,54 @@
       <category-selector @categoryChange="handleCategoryChange"></category-selector>
     </el-card>
     <el-card>
-      <el-button type="primary" icon="el-icon-plus">添加属性</el-button>
-      <el-table
-        v-loading="loading"
-        style="margin-top: 20px"
-        border
-        :data="attrs"
-      >
-        <el-table-column type="index" label="序号" width="80" align="center"/>
-        <el-table-column label="属性名称" width="150" prop="attrName"/>
-        <el-table-column label="属性值列表">
-          <template v-slot="{row, $index}">
-            <el-tag v-for="(value, index) in row.attrValueList" :key="value.id" >{{value.valueName}}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作">
-          <template v-slot="{row, $index}">
-            <hint-button title="修改属性" type="warning" size="small" icon="el-icon-edit"/>
-            <hint-button title="删除属性" type="danger" size="small" icon="el-icon-delete"/>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div v-show="isShowList">
+        <el-button type="primary" icon="el-icon-plus" @click="showAdd">添加属性</el-button>
+        <el-table
+          v-loading="loading"
+          style="margin-top: 20px"
+          border
+          :data="attrs"
+        >
+          <el-table-column type="index" label="序号" width="80" align="center"/>
+          <el-table-column label="属性名称" width="150" prop="attrName"/>
+          <el-table-column label="属性值列表">
+            <template v-slot="{row, $index}">
+              <el-tag v-for="(value, index) in row.attrValueList" :key="value.id" >{{value.valueName}}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作">
+            <template v-slot="{row, $index}">
+              <hint-button title="修改属性" type="warning" size="small" icon="el-icon-edit" @click="showUpdate(row)"/>
+              <hint-button title="删除属性" type="danger" size="small" icon="el-icon-delete"/>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+
+      <div v-show="!isShowList">
+        <el-form inline>
+          <el-form-item label="属性名">
+            <el-input placeholder="请输入属性名称" v-model="attr.attrName"></el-input>
+          </el-form-item>
+        </el-form>
+
+        <el-button type="primary" icon="el-icon-plus">添加属性值</el-button>
+        <el-button>取消</el-button>
+
+        <el-table border style="margin: 20px 0" :data="attr.attrValueList">
+          <el-table-column type="index" label="序号" width="80" align="center"></el-table-column>
+          <el-table-column label="属性值名称" prop="valueName"></el-table-column>
+          <el-table-column label="操作">
+            <template v-slot="{row, $index}">
+              <hint-button title="删除" icon="el-icon-delete" size="mini" type="danger"></hint-button>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <el-button type="primary">保存</el-button>
+        <el-button @click="isShowList = true">取消</el-button>
+
+      </div>
     </el-card>
   </div>
 </template>
@@ -40,18 +67,47 @@ export default {
       category3Id: '', // 三级分类id
       attrs: [], // 属性列表
       loading: false,
+      isShowList: true, // 是否显示列表界面
+      attr: {
+        attrName: '',
+        attrValueList: []
+      }, // 当前操作(修改/添加)的属性对象
     }
   },
 
   async mounted () {
     // 为了方便测试
-    // this.category1Id = 2
-    // this.category2Id = 13
-    // this.category3Id = 61
-    // this.getAttrs()
+    this.category1Id = 2
+    this.category2Id = 13
+    this.category3Id = 61
+    this.getAttrs()
   },
 
   methods: {
+
+    /* 
+    显示修改界面
+    */
+    showUpdate (attr) {
+      // 保存当前属性对象
+      this.attr = attr
+      // 显示修改界面
+      this.isShowList = false
+    },
+
+    /* 
+    显示添加界面
+    */
+    showAdd () {
+      // 重置attr
+      this.attr = {
+        attrName: '',
+        attrValueList: []
+      }
+      // 显示添加界面
+      this.isShowList = false
+    },
+
     handleCategoryChange ({categoryId, level}) {
       if (level===1) {
         this.category1Id = categoryId
