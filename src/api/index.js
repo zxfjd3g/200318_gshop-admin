@@ -6,6 +6,7 @@ export {default as category} from './category'
 export {default as clientUser} from './clientUser'
 export {default as trademark} from './product/trademark'
 export {default as attr} from './product/attr'
+export {default as spu} from './product/spu'
 
 
 /* 
@@ -19,6 +20,7 @@ export {default as attr} from './product/attr'
   clientUser,
   clientUser,
   trademark,
-  attr
+  attr,
+  spu
 }
 */

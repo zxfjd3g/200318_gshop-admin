@@ -23,7 +23,11 @@
           <el-table-column label="操作">
             <template v-slot="{row, $index}">
               <hint-button title="修改属性" type="warning" size="small" icon="el-icon-edit" @click="showUpdate(row)"/>
-              <hint-button title="删除属性" type="danger" size="small" icon="el-icon-delete"/>
+              <el-popconfirm :title="`确定删除 ${row.attrName} 吗?`" 
+                @onConfirm="deleteAttr(row.id)">
+                 <hint-button slot="reference" title="删除属性" type="danger" size="small" icon="el-icon-delete"/>
+              </el-popconfirm>
+              
             </template>
           </el-table-column>
         </el-table>
@@ -37,7 +41,7 @@
         </el-form>
 
         <el-button type="primary" icon="el-icon-plus" @click="addAttrValue" :disabled="!attr.attrName">添加属性值</el-button>
-        <el-button>取消</el-button>
+        <el-button @click="isShowList = true">取消</el-button>
 
         <el-table border style="margin: 20px 0" :data="attr.attrValueList">
           <el-table-column type="index" label="序号" width="80" align="center"></el-table-column>
@@ -54,7 +58,6 @@
                 :title="`确定删除 ${row.valueName} 吗?`"
                 @onConfirm="attr.attrValueList.splice($index, 1)"
               >
-                <!-- <el-button slot="reference">删除</el-button> -->
                 <hint-button slot="reference" title="删除" icon="el-icon-delete" size="mini" type="danger"></hint-button>
               </el-popconfirm>
             </template>
@@ -106,6 +109,15 @@ export default {
   },
 
   methods: {
+
+    /* 
+    删除属性
+    */
+    async deleteAttr (id) {
+      const result = await this.$API.attr.deleteAttr(id)
+      this.$message.success(result.message || '删除属性成功')
+      this.getAttrs()
+    },
 
     /* 
     添加/更新属性
