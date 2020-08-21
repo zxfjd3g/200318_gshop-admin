@@ -1,22 +1,22 @@
 ## 功能列表
-    1.SPU的分页列表
-    2.添加SPU
-    3.修改SPU
-    4.删除指定SPU
-    5.给某个SPU添加SKU
-    6.查看SPU下的SKU列表
-    7.SKU的分页列表
-    8.对SKU进行上架/下架处理
-    9.查看SKU详情
+    1) SPU的分页列表
+    2) 添加SPU
+    3) 修改SPU
+    4) 删除指定SPU
+    5) 给某个SPU添加SKU
+    6) 查看SPU下的SKU列表
+    7) SKU的分页列表
+    8) 对SKU进行上架/下架处理
+    9) 查看SKU详情
 
 ## 理解区别2组业务概念
-    1. SPU与SKU
-      SPU: 某个商品所有相关信息的集合, 包括所有可选择的图片, 可选择的平台属性与销售属性
-      SKU: SPU下确定了图片列表/平台属性与销售属性数据的信息集合, 商品唯一标识
-      关系: 一个SPU下可以对应多个SKU
-    2. 平台属性与销售属性
-      平台属性: 用于(出现)商品搜索的商品描述信息, 包含属性名与一系列的属性值
-      销售属性: 出现在商品详情界面的商品描述信息, 包含属性名与一系列的属性值
+    1) SPU与SKU
+		SPU: 某个商品所有相关信息的集合, 包括所有可选择的图片, 可选择的平台属性与销售属性
+      	SKU: SPU下确定了图片列表/平台属性与销售属性数据的信息集合, 商品唯一标识
+		关系: 一个SPU下可以对应多个SKU
+    2) 平台属性与销售属性
+      	平台属性: 用于(出现)商品搜索的商品描述信息, 包含属性名与一系列的属性值
+      	销售属性: 出现在商品详情界面的商品描述信息, 包含属性名与一系列的属性值
 
 ## SPU与SKU相关接口请求函数
 
@@ -31,20 +31,21 @@
 		通过子组件更新父组件的数据 ==>从而实现SpuForm的显示隐藏
 			使用$parent ===> 不太好, 需要多次取$parent
 			使用.sync
-				父组件: <SpuForm :visible.sync="isShowSpuForm"></SpuForm>
+				父组件: 
+					<SpuForm :visible.sync="isShowSpuForm"></SpuForm>
 				子组件: 
 					props: {visible: Boolean}
 					this.$emit('update:visible', false)
 
 ## SpuForm组件: 动态获取数据
     修改SPU
-		1). 根据spuId请求获取spuInfo  spu.get(spuId)
-		2). 根据spuId请求获取spuImageList  sku.getSpuImageList (spuId)
-		3). 获取所有品牌的列表trademarkList trademark.getList()
-		4). 获取所有销售属性的列表saleAttrList spu.getSaleAttrList()
+		1) 根据spuId请求获取spuInfo  spu.get(spuId)
+		2) 根据spuId请求获取spuImageList  sku.getSpuImageList (spuId)
+		3) 获取所有品牌的列表trademarkList trademark.getList()
+		4) 获取所有销售属性的列表saleAttrList spu.getSaleAttrList()
     添加SPU
-    	1). 获取所有品牌的列表trademarkList trademark.getList()
-		2). 获取所有销售属性的列表saleAttrList spu.getSaleAttrList()
+    	1) 获取所有品牌的列表trademarkList trademark.getList()
+		2) 获取所有销售属性的列表saleAttrList spu.getSaleAttrList()
 	在父组件中通知子组件请求获取数据
 		使用ref技术得到子组件对象, 并调用父组件对象方法
 
