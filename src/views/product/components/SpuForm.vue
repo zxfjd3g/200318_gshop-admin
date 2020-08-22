@@ -20,10 +20,12 @@
         on-success: 上传图片成功的回调函数
        -->
       <el-upload
+        multiple
         :action="$BASE_API + '/admin/product/fileUpload'"
         list-type="picture-card"
         :on-preview="handlePictureCardPreview"
         :on-remove="handleRemove"
+        :on-success="handleSuccess"
         :file-list="spuImageList">
         <i class="el-icon-plus"></i>
       </el-upload>
@@ -32,9 +34,9 @@
       </el-dialog>
     </el-form-item>
     <el-form-item label="销售属性">
-      <el-select value="">
-        <el-option label="A" value="1"></el-option>
-        <el-option label="B" value="2"></el-option>
+      <el-select value="" :placeholder="saleAttrPlaceHolder">
+        <el-option :label="attr.name" :value="attr.id" v-for="attr in unUsedSaleAttrList" 
+          :key="attr.id"></el-option>
       </el-select>
       <el-button type="primary" icon="el-icon-plus">添加销售属性值</el-button>
 
@@ -92,8 +94,8 @@ export default {
 
   data() {
     return {
-      dialogImageUrl: '',
-      dialogVisible: false,
+      dialogImageUrl: '',  // 要预览图片的url
+      dialogVisible: false, // 大图预览是否显示
       spuId: '', // SPU的ID
       spuInfo: {
         spuName: '',
@@ -107,6 +109,31 @@ export default {
       saleAttrList: [], // 销售属性列表
     };
   },
+
+  computed: {
+
+    /* 
+    销售属性的提示文本
+    */
+    saleAttrPlaceHolder () {
+      const {unUsedSaleAttrList} = this
+      return unUsedSaleAttrList.length===0 ? '没有啦!' : `还没${unUsedSaleAttrList.length}个未使用`
+    },
+    /* 
+    还没有在spu销售属性中存在销售属性列表
+    */
+    unUsedSaleAttrList () {
+      const {saleAttrList, spuInfo: {spuSaleAttrList}} = this
+      // 返回过滤后的数组
+      return saleAttrList.filter(attr => {
+        // 判断当前attr是否已经使用了
+        const used = spuSaleAttrList.some(spuAttr => spuAttr.saleAttrName===attr.name)
+
+        return !used  // 只有还没有使用, 才留下来
+      })
+    },
+  },
+
   methods: {
 
     /* 
@@ -182,11 +209,37 @@ export default {
       this.$emit('update:visible', false)
     },
 
-    handleRemove(file, fileList) {
-      console.log(file, fileList);
+    /* 
+    文件上传成功时的钩子
+    response: 上传请求返回的响应体对象
+      {"code":200,"message":"成功","data":"http://182.92.128.115:8080/group1/M00/00/3B/rBFUDF9Ay3-AKicGAAATlhsOuNM712.jpg","ok":true}
+    file: 上传成功的图片相关信息的对象: 图片对象
+    fileList: 所有已上传的图片文件对象的数组(包含原本有的和新上传的)
+    */
+    handleSuccess (response, file, fileList) {
+      console.log('handleSuccess', fileList)
+      this.spuImageList = fileList
     },
+
+    /* 
+    文件列表移除文件时的钩子
+    file: 被移除的图片文本对象 
+    fileList: 剩下的已上传的文件对象的数组
+    */
+    handleRemove(file, fileList) {
+      console.log('handleRemove', fileList);
+      this.spuImageList = fileList
+      // 在此处可以发送删除对应图片的请求(没有对应的接口)
+    },
+    
+    /* 
+    点击文件列表中已上传的文件时的钩子
+    用来预览图片
+    */
     handlePictureCardPreview(file) {
+      // 指定预览图片的url
       this.dialogImageUrl = file.url;
+      // 显示
       this.dialogVisible = true;
     }
   }

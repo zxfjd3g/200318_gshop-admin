@@ -62,7 +62,7 @@
 			    "id": 333,
 			    "spuId": 26,
 			    "imgName": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
-			    "imgUrl": "http://47.93.148.192:8080/xxx.jpg"
+			    "imgUrl": "http://47.93.148.192:8080/xxx.jpg",
 			 }
 		upload组件需要的数据结构:
 			{
@@ -130,6 +130,7 @@
 			    "spuId": 26,
 			    "imgName": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
 			    "imgUrl": "http://47.93.148.192:8080/xxx.jpg",
+				// 后加的
 				 "name": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
 				 "url":  "http://47.93.148.192:8080/xxx.jpg"
 			}
