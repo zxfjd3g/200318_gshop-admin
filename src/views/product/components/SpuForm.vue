@@ -34,11 +34,11 @@
       </el-dialog>
     </el-form-item>
     <el-form-item label="销售属性">
-      <el-select value="" :placeholder="saleAttrPlaceHolder">
-        <el-option :label="attr.name" :value="attr.id" v-for="attr in unUsedSaleAttrList" 
+      <el-select v-model="attrIdAttrName" :placeholder="saleAttrPlaceHolder">
+        <el-option :label="attr.name" :value="attr.id+'-'+attr.name" v-for="attr in unUsedSaleAttrList" 
           :key="attr.id"></el-option>
       </el-select>
-      <el-button type="primary" icon="el-icon-plus">添加销售属性值</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="addSaleAttr">添加销售属性值</el-button>
 
       <el-table border style="margin: 20px 0" :data="spuInfo.spuSaleAttrList">
         <el-table-column label="序号" type="index" width="80" align="center"></el-table-column>
@@ -47,10 +47,11 @@
           <template v-slot="{row, $index}">
             <el-tag
               :key="value.saleAttrValueName"
-              v-for="value in row.spuSaleAttrValueList"
+              v-for="(value, index) in row.spuSaleAttrValueList"
               closable
               :disable-transitions="false"
-              > <!-- @close="handleClose(tag)" -->
+              @close="row.spuSaleAttrValueList.splice(index, 1)"
+              > 
               {{value.saleAttrValueName}}
             </el-tag>
             <el-input
@@ -58,18 +59,18 @@
               v-if="row.edit"
               :ref="$index"
               size="small"
+              v-model="row.saleAttrValueName"
+              @keyup.enter.native="handleInputConfirm(row, $event)"
+              @blur="handleInputConfirm(row, $event)"
             > 
-            <!-- 
-               @keyup.enter.native="handleInputConfirm"
-              @blur="handleInputConfirm"
-             -->
             </el-input>
-            <el-button v-else class="button-new-tag" size="small">+ 添加</el-button>
+            <el-button v-else class="button-new-tag" size="small" @click="showInput(row, $index)">+ 添加</el-button>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="120">
           <template slot-scope="{row, $index}">
-            <hint-button title="删除SPU" type="danger" icon="el-icon-delete" size="mini" />
+            <hint-button title="删除SPU" type="danger" icon="el-icon-delete" size="mini" 
+              @click="spuInfo.spuSaleAttrList.splice($index, 1)"/>
           </template>
         </el-table-column>
       </el-table>
@@ -107,6 +108,7 @@ export default {
       spuImageList: [], // spu图片列表
       trademarkList: [], // 所有品牌列表
       saleAttrList: [], // 销售属性列表
+      attrIdAttrName: '', // 用于收集销售属性id与属性名  id-name
     };
   },
 
@@ -135,6 +137,73 @@ export default {
   },
 
   methods: {
+
+    /* 
+    确定添加属性值
+    */
+    handleInputConfirm (spuSaleAttr, event) {
+
+      // 取出数据
+      const {saleAttrValueName, baseSaleAttrId, spuSaleAttrValueList} = spuSaleAttr
+      // 只有输入了值才去添加
+      if (saleAttrValueName) {
+
+        // 不能重复
+        const isRepeat = spuSaleAttrValueList.some(value => value.saleAttrValueName===saleAttrValueName)
+        if (isRepeat) {
+          this.$message.warning('不能重复')  // 提示
+          event.target.focus() // 自动获得焦点
+          return
+        }
+
+        // 向属性值数组中添加一个属性值对象
+        spuSaleAttrValueList.push({
+          saleAttrValueName,
+          baseSaleAttrId
+        })
+      }
+      
+      // 变为查看模式
+      spuSaleAttr.edit = false
+      // 清除输入收集的数据
+      spuSaleAttr.saleAttrValueName = ''
+
+    },
+
+    /* 
+    显示输入框
+    */
+    showInput (attr, index) {
+      // 显示输入框
+      if (attr.hasOwnProperty('edit')) {
+        attr.edit = true
+      } else {
+        this.$set(attr, 'edit', true)
+      }
+      // 自动获取焦点
+      this.$nextTick(() => this.$refs[index].focus())
+    },
+
+    /* 
+    添加销售属性
+    */
+    addSaleAttr () {
+
+      // 根据attrIdAttrName得到销售属性id和销售属性name
+      const [baseSaleAttrId, saleAttrName] = this.attrIdAttrName.split('-')
+      // 创建一个spu销售属性对象
+      const spuSaleAttr =  {
+        baseSaleAttrId,  // 销售属性id
+        saleAttrName, //销售属性name
+        spuSaleAttrValueList: [] // 销售属性值数组
+      }
+      // 添加到spu销售属性数组中
+      this.spuInfo.spuSaleAttrList.push(spuSaleAttr)
+
+      // 清除收集的id和name数据
+      this.attrIdAttrName = ''
+
+    },
 
     /* 
     用于初始化异步加载更新界面需要的数据
