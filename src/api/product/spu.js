@@ -14,7 +14,7 @@ export default {
     }
   ]
   */
-  getSaleList () {
+  getSaleAttrList () {
     return request.get('/admin/product/baseSaleAttrList')
   },
 

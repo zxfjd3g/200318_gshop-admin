@@ -16,7 +16,7 @@
           <el-table-column label="操作">
             <template slot-scope="{row, $index}">
               <hint-button title="添加SKU" type="primary" icon="el-icon-plus" size="mini" />
-              <hint-button title="修改SPU" type="primary" icon="el-icon-edit" size="mini" />
+              <hint-button title="修改SPU" type="primary" icon="el-icon-edit" size="mini" @click="showSpuUpdate(row)"/>
               <hint-button title="查看所有SKU" type="info" icon="el-icon-info" size="mini" />
               <el-popconfirm
                 :title="`确定删除 ${row.spuName} 吗?`">
@@ -41,7 +41,7 @@
       <!-- 方式一: 使用 v-show + $parent -->
       <!-- <SpuForm v-show="isShowSpuForm"></SpuForm> -->
       <!-- 方式二: sync -->
-      <SpuForm :visible.sync="isShowSpuForm"></SpuForm>
+      <SpuForm :visible.sync="isShowSpuForm" ref="spuForm"></SpuForm>
       <!-- <SpuForm :visible="isShowSpuForm" @update:visible="isShowSpuForm=$event"></SpuForm> -->
 
 
@@ -78,10 +78,22 @@ export default {
   methods: {
 
     /* 
+    显示SPU修改界面
+    */
+    showSpuUpdate (spu) {
+      // 显示form界面
+      this.isShowSpuForm = true
+      // 让form组件加载显示更新界面需要的数据
+      this.$refs.spuForm.initLoadUpdateData(spu.id)
+    },
+
+    /* 
     显示SPU添加
     */
     showSpuAdd () {
       this.isShowSpuForm = true
+      // 让form组件加载显示添加界面需要的数据
+      this.$refs.spuForm.initLoadAddData()
     },
 
     /* 

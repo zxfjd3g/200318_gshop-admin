@@ -7,6 +7,7 @@ export {default as clientUser} from './clientUser'
 export {default as trademark} from './product/trademark'
 export {default as attr} from './product/attr'
 export {default as spu} from './product/spu'
+export {default as sku} from './product/sku'
 
 
 /* 
@@ -21,6 +22,7 @@ export {default as spu} from './product/spu'
   clientUser,
   trademark,
   attr,
-  spu
+  spu,
+  sku
 }
 */
