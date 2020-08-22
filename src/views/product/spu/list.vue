@@ -5,39 +5,52 @@
     </el-card>
 
     <el-card>
-      <el-button type="primary" icon="el-icon-plus" :disabled="!category3Id">添加SPU</el-button>
 
-      <el-table border :data="spuList" style="margin: 20px 0">
-        <el-table-column label="序号" type="index" width="80" align="center"></el-table-column>
-        <el-table-column label="SPU名称" prop="spuName"></el-table-column>
-        <el-table-column label="SPU描述" prop="description"></el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="{row, $index}">
-            <hint-button title="添加SKU" type="primary" icon="el-icon-plus" size="mini" />
-            <hint-button title="修改SPU" type="primary" icon="el-icon-edit" size="mini" />
-            <hint-button title="查看所有SKU" type="info" icon="el-icon-info" size="mini" />
-            <el-popconfirm
-              :title="`确定删除 ${row.spuName} 吗?`">
-              <hint-button slot="reference" title="删除SPU" type="danger" icon="el-icon-delete" size="mini" />
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div v-show="!isShowSpuForm">
+        <el-button type="primary" icon="el-icon-plus" :disabled="!category3Id" @click="showSpuAdd">添加SPU</el-button>
 
-      <el-pagination 
-        style="text-align: center" 
-        :current-page="page" 
-        :page-sizes="[5, 10, 15]" 
-        :page-size="limit"
-        :total="total" 
-        layout="prev, pager, next, jumper, ->, sizes, total" 
-        @current-change="getSpuList"
-        @size-change="handleSizeChange" />
+        <el-table border :data="spuList" style="margin: 20px 0">
+          <el-table-column label="序号" type="index" width="80" align="center"></el-table-column>
+          <el-table-column label="SPU名称" prop="spuName"></el-table-column>
+          <el-table-column label="SPU描述" prop="description"></el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="{row, $index}">
+              <hint-button title="添加SKU" type="primary" icon="el-icon-plus" size="mini" />
+              <hint-button title="修改SPU" type="primary" icon="el-icon-edit" size="mini" />
+              <hint-button title="查看所有SKU" type="info" icon="el-icon-info" size="mini" />
+              <el-popconfirm
+                :title="`确定删除 ${row.spuName} 吗?`">
+                <hint-button slot="reference" title="删除SPU" type="danger" icon="el-icon-delete" size="mini" />
+              </el-popconfirm>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <el-pagination 
+          style="text-align: center" 
+          :current-page="page" 
+          :page-sizes="[5, 10, 15]" 
+          :page-size="limit"
+          :total="total" 
+          layout="prev, pager, next, jumper, ->, sizes, total" 
+          @current-change="getSpuList"
+          @size-change="handleSizeChange" />
+
+      </div>
+
+      <!-- 方式一: 使用 v-show + $parent -->
+      <!-- <SpuForm v-show="isShowSpuForm"></SpuForm> -->
+      <!-- 方式二: sync -->
+      <SpuForm :visible.sync="isShowSpuForm"></SpuForm>
+      <!-- <SpuForm :visible="isShowSpuForm" @update:visible="isShowSpuForm=$event"></SpuForm> -->
+
+
     </el-card>
   </div>
 </template>
 
 <script>
+import SpuForm from '../components/SpuForm'
 export default {
   name: 'SpuList',
 
@@ -50,10 +63,27 @@ export default {
       total: 0, // 总数量
       page: 1, // 当前页码
       limit: 5, // 每页数量
+      isShowSpuForm: false, // 是否显示SpuForm组件界面
     }
   },
 
+  async mounted () {
+    // 为了方便测试
+    this.category1Id = 2
+    this.category2Id = 13
+    this.category3Id = 61
+    this.getSpuList()
+  },
+
   methods: {
+
+    /* 
+    显示SPU添加
+    */
+    showSpuAdd () {
+      this.isShowSpuForm = true
+    },
+
     /* 
     处理分类发生改变的回调
     */
@@ -99,6 +129,10 @@ export default {
       this.limit = limit
       this.getSpuList()
     } 
+  },
+
+  components: {
+    SpuForm
   }
 }
 </script>

@@ -29,7 +29,7 @@
 	控制SpuForm的显示隐藏
 		在父组件中定义标识数据: isShowSpuForm=true/false
 		通过子组件更新父组件的数据 ==>从而实现SpuForm的显示隐藏
-			使用$parent ===> 不太好, 需要多次取$parent
+			方式一: 使用v-show + $parent(有可能需要.多个)
 			使用.sync
 				父组件: 
 					<SpuForm :visible.sync="isShowSpuForm"></SpuForm>
