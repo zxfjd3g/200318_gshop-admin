@@ -12,11 +12,19 @@
       <el-input type="textarea" placeholder="SPU描述" rows="4" v-model="spuInfo.description"></el-input>
     </el-form-item>
     <el-form-item label="SPU图片">
+      <!-- 
+        action: 处理图片上传的地址
+        list-type: 已上传图片列表的样式风格
+        on-preview: 用于处理大图预览的回调函数
+        on-remove: 用于删除图片的回调函数
+        on-success: 上传图片成功的回调函数
+       -->
       <el-upload
-        action="https://jsonplaceholder.typicode.com/posts/"
+        :action="$BASE_API + '/admin/product/fileUpload'"
         list-type="picture-card"
         :on-preview="handlePictureCardPreview"
-        :on-remove="handleRemove">
+        :on-remove="handleRemove"
+        :file-list="spuImageList">
         <i class="el-icon-plus"></i>
       </el-upload>
       <el-dialog :visible.sync="dialogVisible">
@@ -30,11 +38,34 @@
       </el-select>
       <el-button type="primary" icon="el-icon-plus">添加销售属性值</el-button>
 
-      <el-table border style="margin: 20px 0">
+      <el-table border style="margin: 20px 0" :data="spuInfo.spuSaleAttrList">
         <el-table-column label="序号" type="index" width="80" align="center"></el-table-column>
-        <el-table-column label="属性名"></el-table-column>
-        <el-table-column label="属性值名称列表"></el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="属性名" prop="saleAttrName" width="120"></el-table-column>
+        <el-table-column label="属性值名称列表">
+          <template v-slot="{row, $index}">
+            <el-tag
+              :key="value.saleAttrValueName"
+              v-for="value in row.spuSaleAttrValueList"
+              closable
+              :disable-transitions="false"
+              > <!-- @close="handleClose(tag)" -->
+              {{value.saleAttrValueName}}
+            </el-tag>
+            <el-input
+              class="input-new-tag"
+              v-if="row.edit"
+              :ref="$index"
+              size="small"
+            > 
+            <!-- 
+               @keyup.enter.native="handleInputConfirm"
+              @blur="handleInputConfirm"
+             -->
+            </el-input>
+            <el-button v-else class="button-new-tag" size="small">+ 添加</el-button>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="120">
           <template slot-scope="{row, $index}">
             <hint-button title="删除SPU" type="danger" icon="el-icon-delete" size="mini" />
           </template>
@@ -118,6 +149,13 @@ export default {
     async getSpuImageList () {
       const result = await this.$API.sku.getSpuImageList(this.spuId)
       const spuImageList = result.data
+
+      // 给spuImageList中的每个图片对象添加name和url属性, 值为对应的imgName和imgUrl的值
+      spuImageList.forEach(img => {
+        img.name = img.imgName
+        img.url = img.imgUrl
+      })
+
       this.spuImageList = spuImageList
     },
 
@@ -154,3 +192,21 @@ export default {
   }
 }
 </script>
+
+<style>
+  .el-tag + .el-tag {
+    margin-left: 10px;
+  }
+  .button-new-tag {
+    margin-left: 10px;
+    height: 32px;
+    line-height: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .input-new-tag {
+    width: 90px;
+    margin-left: 10px;
+    vertical-align: bottom;
+  }
+</style>
