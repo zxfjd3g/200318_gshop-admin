@@ -258,7 +258,7 @@
 			  "price": "12",
 			  "weight": "2",
 
-			  "skuDefaultImg": "http://47.93.148.192:8080/xxx.jpg",
+			 
 			  "skuAttrValueList": [
 			    {
 			      "attrId": "2",
@@ -270,6 +270,8 @@
 			      "saleAttrValueId": 258
 			    }
 			  ],
+
+			  "skuDefaultImg": "http://47.93.148.192:8080/xxx.jpg",
 			  "skuImageList": [
 			    {
 			      "imgName": "下载 (1).jpg",
@@ -297,7 +299,7 @@
 				      }
 				    ]
 				 }
-			目标: spuInfo.skuAttrValueList
+			目标: skuInfo.skuAttrValueList
 				{
 			      "attrId": "2",
 			      "valueId": "9"
@@ -324,11 +326,11 @@
 				      }
 				    ]
 				 }
-			目标: spuInfo.skuSaleAttrValueList
+			目标: skuInfo.skuSaleAttrValueList
 				{
 			      "saleAttrValueId": 258  
 			    }
-				
+
 			收集: 给spuSaleAttrList中的属性对象添加一个saleAttrValueId属性
 				{
 					...
@@ -343,8 +345,8 @@
 				    "imgUrl": "http://47.93.148.192:8080/xxx.jpg"
 				}
 			目标: 
-				spuInfo.skuDefaultImg: "http://47.93.148.192:8080/xxx.jpg",
-				spuInfo.skuImageList数组
+				skuInfo.skuDefaultImg: "http://47.93.148.192:8080/xxx.jpg",
+				skuInfo.skuImageList数组
 					{
 				      "imgName": "下载 (1).jpg",
 				      "imgUrl": "http://47.93.148.192:8080/xxx.jpg",
@@ -354,8 +356,8 @@
 				
 			收集:
 				在请求得到spuImageList数据后需要对数据进行整理: 每个元素对象添加一个isDefault='0'
-				spuInfo.skuDefaultImg: 通过点击按钮收集
-				selectedSpuImageList数组: selection-change事件监听来收集
+				skuInfo.skuDefaultImg: 通过点击按钮收集
+				skuInfo.skuImageList数组: selection-change事件监听来收集
 				
 
 	5). 发ajax请求前, 整理需要提交的数据
@@ -371,7 +373,7 @@
 				}
 
 		整理2: 销售属性
-			目标数据: spuInfo.skuSaleAttrValueList
+			目标数据: skuInfo.skuSaleAttrValueList
 				{
 			      "saleAttrValueId": 258  
 			    }
@@ -381,7 +383,7 @@
 				}
 
 		整理3: 图片列表
-			目标数据: spuInfo.skuImageList
+			目标数据: skuInfo.skuImageList
 				{
 			      "imgName": "下载 (1).jpg",
 			      "imgUrl": "http://47.93.148.192:8080/xxx.jpg",

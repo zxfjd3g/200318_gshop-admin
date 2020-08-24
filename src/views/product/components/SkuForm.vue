@@ -63,8 +63,8 @@
     </el-form-item>
 
     <el-form-item>
-      <el-button type="primary">保存</el-button>
-      <el-button>取消</el-button>
+      <el-button type="primary" @click="save">保存</el-button>
+      <el-button @click="handleCancel">取消</el-button>
     </el-form-item>
   </el-form>
 </template>
@@ -72,6 +72,10 @@
 <script>
 export default {
   name: 'SkuForm',
+
+  props: {
+    cancel: Function,
+  },
 
   data () {
     return {
@@ -101,6 +105,121 @@ export default {
   },
 
   methods: {
+
+    resetData () {
+      this.spu = {}
+      this.skuInfo = {
+        // 从父组件传入
+        category3Id: null,
+        spuId: null,
+        tmId: null,
+        // 用户输入 v-model
+        skuName: null,
+        skuDesc: null,
+        price: null,
+        weight: null,
+
+        skuDefaultImg: null,  // 默认图片url
+        skuAttrValueList: [], // sku平台属性值列表
+        skuSaleAttrValueList: [], // sku销售属性值列表
+        skuImageList: [], // sku图片列表
+      }
+
+      this.attrList = [] // 平台属性列表
+      this.spuSaleAttrList = [] // spu销售属性列表
+      this.spuImageList = [] // spu图片列表
+    },
+
+    handleCancel () {
+      this.cancel()
+      this.resetData()
+    },
+
+    /* 
+    保存SKU
+    */
+    async save () {
+      // 准备数据(对数据做必要的整理)
+      const {skuInfo, attrList, spuSaleAttrList} = this
+      
+      /* 
+      整理1: 平台属性
+        目标数据: skuInfo.skuAttrValueList
+          {
+              "attrId": "2",
+              "valueId": "9"
+            }
+        现有数据: attrList
+          {
+            attrIdValueId: '2:9' // 可能没有
+          }
+      */
+      attrList.forEach(attr => {
+        const {attrIdValueId} = attr
+        if (attrIdValueId) {
+          const [attrId, valueId] = attrIdValueId.split(':')
+          skuInfo.skuAttrValueList.push({
+            attrId,
+            valueId
+          })
+        }
+      });
+
+      /* 
+        整理2: 销售属性
+          目标数据: skuInfo.skuSaleAttrValueList
+            {
+                "saleAttrValueId": 258  
+              }
+          现有数据: spuSaleAttrList
+            {
+              saleAttrValueId: 258 // 可能没有
+            }
+      */
+      spuSaleAttrList.forEach(attr => {
+        const {saleAttrValueId} = attr
+        if (saleAttrValueId) {
+          skuInfo.skuSaleAttrValueList.push({
+            saleAttrValueId
+          })
+        }
+      })
+
+      /* 
+        整理3: 图片列表
+          目标数据: skuInfo.skuImageList
+            {
+                "imgName": "下载 (1).jpg",
+                "imgUrl": "http://47.93.148.192:8080/xxx.jpg",
+                "spuImgId": 337, // 当前Spu图片的id
+                "isDefault": "1"   // 默认为"1", 非默认为"0"
+              }
+          现有数据: skuInfo.skuImageList
+            {
+                "id": 333,
+                "spuId": 26,
+                "imgName": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
+                "imgUrl": "http://47.93.148.192:8080/xxx.jpg",
+                "isDefault": "1" / "0"
+            }
+      */
+      skuInfo.skuImageList = skuInfo.skuImageList.map(item => ({
+        imgName: item.imgName,
+        imgUrl: item.imgUrl,
+        spuImgId: item.id, // 当前Spu图片的id
+        isDefault: item.isDefault   // 默认为"1", 非默认为"0"
+      }))
+
+
+
+      // 发送ajax请求
+      await this.$API.sku.addUpdate(skuInfo)
+
+      // 请求成功了...
+      this.$message.success('保存sku成功')
+      this.resetData()
+      this.$emit('success')
+    },
 
     /* 
     val: 所有选中的行数据对象的数组
