@@ -15,11 +15,12 @@
           <el-table-column label="SPU描述" prop="description"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="{row, $index}">
-              <hint-button title="添加SKU" type="primary" icon="el-icon-plus" size="mini" @click="isShowSkuForm=true"/>
+              <hint-button title="添加SKU" type="primary" icon="el-icon-plus" size="mini" @click="showSkuAdd(row)"/>
               <hint-button title="修改SPU" type="primary" icon="el-icon-edit" size="mini" @click="showSpuUpdate(row)"/>
               <hint-button title="查看所有SKU" type="info" icon="el-icon-info" size="mini" @click="showSkuList(row)"/>
               <el-popconfirm
-                :title="`确定删除 ${row.spuName} 吗?`">
+                :title="`确定删除 ${row.spuName} 吗?`"
+                @onConfirm="deleteSpu(row.id)">
                 <hint-button slot="reference" title="删除SPU" type="danger" icon="el-icon-delete" size="mini" />
               </el-popconfirm>
             </template>
@@ -45,7 +46,7 @@
         @success="handleSuccess" @cancel="handleCancel" />
       <!-- <SpuForm :visible="isShowSpuForm" @update:visible="isShowSpuForm=$event"></SpuForm> -->
 
-      <SkuForm v-show="isShowSkuForm"/>
+      <SkuForm v-show="isShowSkuForm" ref="skuForm"/>
     </el-card>
 
     <el-dialog :title="`${spu.spuName} => SKU列表`" :visible.sync="isShowDialog">
@@ -97,6 +98,44 @@ export default {
   },
 
   methods: {
+
+    /* 
+    显示sku的添加界面
+    */
+    showSkuAdd (spu) {
+      // 显示SkuForm界面
+      this.isShowSkuForm = true
+      // 准备SKuForm初始显示需要的条件数据
+      // const data = {
+      //   spuId: spu.id,
+      //   spuName: spu.spuName,
+      //   category1Id: this.category1Id,
+      //   category2Id: this.category2Id,
+      //   category3Id: this.category3Id,
+      //   tmId: spu.tmId
+      // }
+      // 让skuForm组件对象去加载初始数据显示
+      // this.$refs.skuForm.initLoadAddData(data)
+
+      spu = {
+        ...spu, // 尽量不要修改原本的数据
+        category1Id: this.category1Id,
+        category2Id: this.category2Id
+      }
+      this.$refs.skuForm.initLoadAddData(spu)
+    },
+
+    /* 
+    删除指定spu
+    */
+    async deleteSpu (spuId) {
+      // 发送ajax请求
+      const result = await this.$API.spu.remove(spuId)
+      // 提示成功
+      this.$message.success('删除SPU成功')
+      // 重新获取列表显示
+      this.getSpuList()
+    },
 
     /* 
     显示指定SPU下的SKU列表

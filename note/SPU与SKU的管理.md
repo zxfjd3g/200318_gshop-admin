@@ -252,10 +252,12 @@
 			  "category3Id": 61,
 			  "spuId": 30,
 			  "tmId": 2,
+
 			  "skuName": "aa",
 			  "skuDesc": "aa描述",
 			  "price": "12",
 			  "weight": "2",
+
 			  "skuDefaultImg": "http://47.93.148.192:8080/xxx.jpg",
 			  "skuAttrValueList": [
 			    {
