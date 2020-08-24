@@ -1,17 +1,17 @@
 <template>
-  <el-form label-width="80px" v-show="visible">
-    <el-form-item label="SPU名称">
-      <el-input placeholder="SPU名称" v-model="spuInfo.spuName"></el-input>
+  <el-form label-width="80px" v-show="visible" :model="spuInfo" :rules="spuRules" ref="form">
+    <el-form-item label="SPU名称" prop="spuName">
+      <el-input placeholder="SPU名称" v-model.trim="spuInfo.spuName"></el-input>
     </el-form-item>
-    <el-form-item label="品牌">
+    <el-form-item label="品牌" prop="tmId">
       <el-select v-model="spuInfo.tmId">
         <el-option :label="tm.tmName" :value="tm.id" v-for="tm in trademarkList" :key="tm.id"></el-option>
       </el-select>
     </el-form-item>
-    <el-form-item label="SPU描述">
+    <el-form-item label="SPU描述" prop="description">
       <el-input type="textarea" placeholder="SPU描述" rows="4" v-model="spuInfo.description"></el-input>
     </el-form-item>
-    <el-form-item label="SPU图片">
+    <el-form-item label="SPU图片" prop="spuImageList">
       <!-- 
         action: 处理图片上传的地址
         list-type: 已上传图片列表的样式风格
@@ -33,7 +33,7 @@
         <img width="100%" :src="dialogImageUrl" alt="">
       </el-dialog>
     </el-form-item>
-    <el-form-item label="销售属性">
+    <el-form-item label="销售属性" prop="spuSaleAttrList">
       <el-select v-model="attrIdAttrName" :placeholder="saleAttrPlaceHolder">
         <el-option :label="attr.name" :value="attr.id+'-'+attr.name" v-for="attr in unUsedSaleAttrList" 
           :key="attr.id"></el-option>
@@ -78,7 +78,7 @@
     </el-form-item>
 
     <el-form-item>
-      <el-button type="primary" @click="save">保存</el-button>
+      <el-button :loading="loading" type="primary" @click="save">保存</el-button>
       <el-button @click="cancel">取消</el-button>
     </el-form-item>
 
@@ -110,7 +110,25 @@ export default {
       trademarkList: [], // 所有品牌列表
       saleAttrList: [], // 销售属性列表
       attrIdAttrName: '', // 用于收集销售属性id与属性名  id-name
-    };
+      loading: false, //按钮是否显示loading
+      spuRules: {
+        spuName: [
+          {required: true, message: 'SPU名称必须的'}
+        ],
+        tmId: [
+          {required: true, message: '品牌必须的'}
+        ],
+        description: [
+          {required: true, message: 'SPU描述必须的'}
+        ],
+        spuImageList: [
+          {required: true, validator: this.validateSpuImageList}
+        ],
+        spuSaleAttrList: [
+          {required: true, validator: this.validateSpuSaleAttrList}
+        ],
+      }
+    }
   },
 
   computed: {
@@ -140,6 +158,30 @@ export default {
   methods: {
 
     /* 
+    对spuSaleAttrList进行自定义校验
+    */
+    validateSpuSaleAttrList (rule, value, callback) {
+
+      // 判断spuSaleAttrList中有没有包含属性值对象的属性
+      const has = value.some(attr => attr.spuSaleAttrValueList.length>0)
+      if (has) {
+         callback() // 通过
+      } else {
+        callback('至少指定一个SPU销售属性') // 没有通过, 显示指定提示信息
+      }
+    },
+    /* 
+    对SpuImageList进行自定义校验
+    */
+    validateSpuImageList (rule, value, callback) {
+      if (value.length===0) {
+        callback('至少指定一个SPU图片') // 没有通过, 显示指定提示信息
+      } else {
+        callback() // 通过
+      }
+    },
+
+    /* 
     重置data数据
     */
     resetData () {
@@ -157,80 +199,94 @@ export default {
       this.trademarkList = []
       this.saleAttrList = []
       this.attrIdAttrName = ''
+      this.loading = false
     },
 
     /* 
     添加或更新SPU
     */
-    async save () {
-      // 准备数据
-      const {spuInfo} = this
+    save () {
+      this.$refs.form.validate(async valid => {
+        if (valid) {
+           // 准备数据
+          const {spuInfo} = this
 
-      /* 
-      整理1: SPU图片列表 spuImageList
-        {
-            "imgName": "下载 (1).jpg",
-            "imgUrl": "http://47.93.148.192:8080/xxx.jpg"
-        }
-
-        从后台获取的图片文件对象的结构
-          {
-              "id": 333,
-              "spuId": 26,
-              "imgName": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
-              "imgUrl": "http://47.93.148.192:8080/xxx.jpg",
-              // 后加的
-              "name": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
-              "url":  "http://47.93.148.192:8080/xxx.jpg"
-          }
-        新上传的图片文件对象的结构
-          {
-            name: "e814ec6fd86c5a8c.jpg"
-            response: {
-              data: "http://182.92.128.115:8080/group1/xxx.jpg"
+          /* 
+          整理1: SPU图片列表 spuImageList
+            {
+                "imgName": "下载 (1).jpg",
+                "imgUrl": "http://47.93.148.192:8080/xxx.jpg"
             }
-            url: "blob:http://localhost:9529/a5199d82-0811-442d-9ec2-dafae83d9ed9"
-			    }
-      */
-      spuInfo.spuImageList = spuInfo.spuImageList.map(item => ({
-        imgName: item.name,
-        imgUrl: item.response ? item.response.data : item.url
-      }))
 
-      // this.spuInfo.spuImageList = this.spuInfo.spuImageList.reduce((pre, item) => {
-      //   pre.push({
-      //     imgName: item.name,
-      //     imgUrl: item.response ? item.response.data : item.url
-      //   })
-      //   return pre
-      // }, [])
+            从后台获取的图片文件对象的结构
+              {
+                  "id": 333,
+                  "spuId": 26,
+                  "imgName": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
+                  "imgUrl": "http://47.93.148.192:8080/xxx.jpg",
+                  // 后加的
+                  "name": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
+                  "url":  "http://47.93.148.192:8080/xxx.jpg"
+              }
+            新上传的图片文件对象的结构
+              {
+                name: "e814ec6fd86c5a8c.jpg"
+                response: {
+                  data: "http://182.92.128.115:8080/group1/xxx.jpg"
+                }
+                url: "blob:http://localhost:9529/a5199d82-0811-442d-9ec2-dafae83d9ed9"
+              }
+          */
+          spuInfo.spuImageList = spuInfo.spuImageList.map(item => ({
+            imgName: item.name,
+            imgUrl: item.response ? item.response.data : item.url
+          }))
 
-     /* 
-     	整理2: SPU销售属性列表 spuSaleAttrList
-      	过滤掉没有属性值的属性对象
-      	删除一些不必要的属性数据(为了界面显示而添加: saleAttrValueName/edit)
-     */
-      spuInfo.spuSaleAttrList = spuInfo.spuSaleAttrList.filter(attr => {
-        // 过滤掉没有属性值的属性
-        if (attr.spuSaleAttrValueList.length===0) return false
-        // 删除属性对象上的saleAttrValueName/edit
-        delete attr.saleAttrValueName
-        delete attr.edit
+          // this.spuInfo.spuImageList = this.spuInfo.spuImageList.reduce((pre, item) => {
+          //   pre.push({
+          //     imgName: item.name,
+          //     imgUrl: item.response ? item.response.data : item.url
+          //   })
+          //   return pre
+          // }, [])
 
-        return true
+        /* 
+          整理2: SPU销售属性列表 spuSaleAttrList
+            过滤掉没有属性值的属性对象
+            删除一些不必要的属性数据(为了界面显示而添加: saleAttrValueName/edit)
+        */
+          spuInfo.spuSaleAttrList = spuInfo.spuSaleAttrList.filter(attr => {
+            // 过滤掉没有属性值的属性
+            if (attr.spuSaleAttrValueList.length===0) return false
+            // 删除属性对象上的saleAttrValueName/edit
+            delete attr.saleAttrValueName
+            delete attr.edit
+
+            return true
+          })
+
+
+          // 请求前显示loading
+          this.loading = true
+
+          try {
+            // 发送添加/更新SPU的请求
+            await this.$API.spu.addUpdate(spuInfo)
+            // 成功后处理...
+            // 提示成功
+            this.$message.success('保存属性成功!!!')
+            // 通知关闭当前form
+            this.$emit('update:visible', false)
+            // 通知父组件操作成功了
+            this.$emit('success')
+            // 重置数据
+            this.resetData()
+          } finally {  // 无论成功失败都进入
+            // 无论请求成功还是失败, 都隐藏loading
+            this.loading = false
+          }
+        }
       })
-    
-      // 发送添加/更新SPU的请求
-      await this.$API.spu.addUpdate(spuInfo)
-      // 成功后处理...
-      // 提示成功
-      this.$message.success('保存属性成功!!!')
-      // 通知关闭当前form
-      this.$emit('update:visible', false)
-      // 通知父组件操作成功了
-      this.$emit('success')
-      // 重置数据
-      this.resetData()
     },
 
     cancel () {
