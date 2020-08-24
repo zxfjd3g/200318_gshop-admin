@@ -26,7 +26,7 @@
         :on-preview="handlePictureCardPreview"
         :on-remove="handleRemove"
         :on-success="handleSuccess"
-        :file-list="spuImageList">
+        :file-list="spuInfo.spuImageList">
         <i class="el-icon-plus"></i>
       </el-upload>
       <el-dialog :visible.sync="dialogVisible">
@@ -78,7 +78,7 @@
     </el-form-item>
 
     <el-form-item>
-      <el-button type="primary">保存</el-button>
+      <el-button type="primary" @click="save">保存</el-button>
       <el-button @click="cancel">取消</el-button>
     </el-form-item>
 
@@ -103,9 +103,10 @@ export default {
         description: '',
         category3Id: '',
         tmId: '',
-        spuSaleAttrList: []
+        spuSaleAttrList: [],
+        spuImageList: [],
       }, // spu详情信息对象
-      spuImageList: [], // spu图片列表
+      // spuImageList: [], // spu图片列表
       trademarkList: [], // 所有品牌列表
       saleAttrList: [], // 销售属性列表
       attrIdAttrName: '', // 用于收集销售属性id与属性名  id-name
@@ -137,6 +138,74 @@ export default {
   },
 
   methods: {
+
+    /* 
+    添加或更新SPU
+    */
+    async save () {
+      // 准备数据
+      const {spuInfo} = this
+
+      /* 
+      整理1: SPU图片列表 spuImageList
+        {
+            "imgName": "下载 (1).jpg",
+            "imgUrl": "http://47.93.148.192:8080/xxx.jpg"
+        }
+
+        从后台获取的图片文件对象的结构
+          {
+              "id": 333,
+              "spuId": 26,
+              "imgName": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
+              "imgUrl": "http://47.93.148.192:8080/xxx.jpg",
+              // 后加的
+              "name": "rBHu8l6UcKyAfzDsAAAPN5YrVxw870.jpg",
+              "url":  "http://47.93.148.192:8080/xxx.jpg"
+          }
+        新上传的图片文件对象的结构
+          {
+            name: "e814ec6fd86c5a8c.jpg"
+            response: {
+              data: "http://182.92.128.115:8080/group1/xxx.jpg"
+            }
+            url: "blob:http://localhost:9529/a5199d82-0811-442d-9ec2-dafae83d9ed9"
+			    }
+      */
+      spuInfo.spuImageList = spuInfo.spuImageList.map(item => ({
+        imgName: item.name,
+        imgUrl: item.response ? item.response.data : item.url
+      }))
+
+      // this.spuInfo.spuImageList = this.spuInfo.spuImageList.reduce((pre, item) => {
+      //   pre.push({
+      //     imgName: item.name,
+      //     imgUrl: item.response ? item.response.data : item.url
+      //   })
+      //   return pre
+      // }, [])
+
+     /* 
+     	整理2: SPU销售属性列表 spuSaleAttrList
+      	过滤掉没有属性值的属性对象
+      	删除一些不必要的属性数据(为了界面显示而添加: saleAttrValueName/edit)
+     */
+      spuInfo.spuSaleAttrList = spuInfo.spuSaleAttrList.filter(attr => {
+        // 过滤掉没有属性值的属性
+        if (attr.spuSaleAttrValueList.length===0) return false
+        // 删除属性对象上的saleAttrValueName/edit
+        delete attr.saleAttrValueName
+        delete attr.edit
+
+        return true
+      })
+    
+
+      // 发送添加/更新SPU的请求
+      await this.$API.spu.addUpdate(spuInfo)
+      // 成功后处理...
+      this.$message.success('保存属性成功!!!')
+    },
 
     /* 
     确定添加属性值
@@ -225,7 +294,8 @@ export default {
     1) 获取所有品牌的列表trademarkList trademark.getList()
 		2) 获取所有销售属性的列表saleAttrList spu.getSaleAttrList()
     */
-    initLoadAddData () {
+    initLoadAddData (category3Id) {
+      this.spuInfo.category3Id = category3Id
       this.getTrademarkList()
       this.getSaleAttrList()
     },
@@ -236,6 +306,7 @@ export default {
     async getSpuInfo () {
       const result = await this.$API.spu.get(this.spuId)
       const spuInfo = result.data
+      spuInfo.spuImageList = []   // 默认是null  ==> Upload组件出错
       this.spuInfo = spuInfo
     },
 
@@ -252,7 +323,7 @@ export default {
         img.url = img.imgUrl
       })
 
-      this.spuImageList = spuImageList
+      this.spuInfo.spuImageList = spuImageList
     },
 
     /* 
@@ -287,7 +358,7 @@ export default {
     */
     handleSuccess (response, file, fileList) {
       console.log('handleSuccess', fileList)
-      this.spuImageList = fileList
+      this.spuInfo.spuImageList = fileList
     },
 
     /* 
@@ -297,7 +368,7 @@ export default {
     */
     handleRemove(file, fileList) {
       console.log('handleRemove', fileList);
-      this.spuImageList = fileList
+      this.spuInfo.spuImageList = fileList
       // 在此处可以发送删除对应图片的请求(没有对应的接口)
     },
     

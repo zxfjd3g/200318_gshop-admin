@@ -93,7 +93,7 @@ export default {
     showSpuAdd () {
       this.isShowSpuForm = true
       // 让form组件加载显示添加界面需要的数据
-      this.$refs.spuForm.initLoadAddData()
+      this.$refs.spuForm.initLoadAddData(this.category3Id)
     },
 
     /* 
