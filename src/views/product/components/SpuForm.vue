@@ -140,6 +140,26 @@ export default {
   methods: {
 
     /* 
+    重置data数据
+    */
+    resetData () {
+      this.dialogImageUrl = ''
+      this.dialogVisible = false
+      this.spuId = ''
+      this.spuInfo = {
+        spuName: '',
+        description: '',
+        category3Id: '',
+        tmId: '',
+        spuSaleAttrList: [],
+        spuImageList: [],
+      }
+      this.trademarkList = []
+      this.saleAttrList = []
+      this.attrIdAttrName = ''
+    },
+
+    /* 
     添加或更新SPU
     */
     async save () {
@@ -200,11 +220,26 @@ export default {
         return true
       })
     
-
       // 发送添加/更新SPU的请求
       await this.$API.spu.addUpdate(spuInfo)
       // 成功后处理...
+      // 提示成功
       this.$message.success('保存属性成功!!!')
+      // 通知关闭当前form
+      this.$emit('update:visible', false)
+      // 通知父组件操作成功了
+      this.$emit('success')
+      // 重置数据
+      this.resetData()
+    },
+
+    cancel () {
+      // this.$parent.$parent.isShowSpuForm = false
+      this.$emit('update:visible', false)
+      // 通知父组件取消了操作
+      this.$emit('cancel')
+      // 重置数据
+      this.resetData()
     },
 
     /* 
@@ -342,11 +377,6 @@ export default {
       const result = await this.$API.trademark.getList()
       const trademarkList = result.data
       this.trademarkList = trademarkList
-    },
-
-    cancel () {
-      // this.$parent.$parent.isShowSpuForm = false
-      this.$emit('update:visible', false)
     },
 
     /* 

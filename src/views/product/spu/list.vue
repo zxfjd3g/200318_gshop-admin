@@ -41,7 +41,8 @@
       <!-- 方式一: 使用 v-show + $parent -->
       <!-- <SpuForm v-show="isShowSpuForm"></SpuForm> -->
       <!-- 方式二: sync -->
-      <SpuForm :visible.sync="isShowSpuForm" ref="spuForm"></SpuForm>
+      <SpuForm :visible.sync="isShowSpuForm" ref="spuForm" 
+        @success="handleSuccess" @cancel="handleCancel" />
       <!-- <SpuForm :visible="isShowSpuForm" @update:visible="isShowSpuForm=$event"></SpuForm> -->
 
 
@@ -77,10 +78,26 @@ export default {
 
   methods: {
 
+    handleSuccess () {
+      // 需要区别是添加还是更新
+      this.getSpuList(this.spuId ? this.page : 1)
+      // 清除spuID
+      this.spuId = null
+    },
+
+    handleCancel () {
+      // 清除spuID
+      this.spuId = null
+    },
+
+
     /* 
     显示SPU修改界面
     */
     showSpuUpdate (spu) {
+      // 保存spu的id
+      this.spuId = spu.id  // 只有点修改才会有
+
       // 显示form界面
       this.isShowSpuForm = true
       // 让form组件加载显示更新界面需要的数据
