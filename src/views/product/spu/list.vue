@@ -6,7 +6,7 @@
 
     <el-card>
 
-      <div v-show="!isShowSpuForm">
+      <div v-show="!isShowSpuForm && !isShowSkuForm">
         <el-button type="primary" icon="el-icon-plus" :disabled="!category3Id" @click="showSpuAdd">添加SPU</el-button>
 
         <el-table border :data="spuList" style="margin: 20px 0">
@@ -15,9 +15,9 @@
           <el-table-column label="SPU描述" prop="description"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="{row, $index}">
-              <hint-button title="添加SKU" type="primary" icon="el-icon-plus" size="mini" />
+              <hint-button title="添加SKU" type="primary" icon="el-icon-plus" size="mini" @click="isShowSkuForm=true"/>
               <hint-button title="修改SPU" type="primary" icon="el-icon-edit" size="mini" @click="showSpuUpdate(row)"/>
-              <hint-button title="查看所有SKU" type="info" icon="el-icon-info" size="mini" />
+              <hint-button title="查看所有SKU" type="info" icon="el-icon-info" size="mini" @click="showSkuList(row)"/>
               <el-popconfirm
                 :title="`确定删除 ${row.spuName} 吗?`">
                 <hint-button slot="reference" title="删除SPU" type="danger" icon="el-icon-delete" size="mini" />
@@ -45,13 +45,27 @@
         @success="handleSuccess" @cancel="handleCancel" />
       <!-- <SpuForm :visible="isShowSpuForm" @update:visible="isShowSpuForm=$event"></SpuForm> -->
 
-
+      <SkuForm v-show="isShowSkuForm"/>
     </el-card>
+
+    <el-dialog :title="`${spu.spuName} => SKU列表`" :visible.sync="isShowDialog">
+      <el-table :data="skuList" v-loading="isLoading">
+        <el-table-column prop="skuName" label="名称"></el-table-column>
+        <el-table-column property="price" label="价格(元)"></el-table-column>
+        <el-table-column property="weight" label="重量(KG)"></el-table-column>
+        <el-table-column label="默认图片">
+          <template slot-scope="{row}">
+            <img :src="row.skuDefaultImg" alt="" style="width:100px;height:100px;">
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import SpuForm from '../components/SpuForm'
+import SkuForm from '../components/SkuForm'
 export default {
   name: 'SpuList',
 
@@ -65,6 +79,12 @@ export default {
       page: 1, // 当前页码
       limit: 5, // 每页数量
       isShowSpuForm: false, // 是否显示SpuForm组件界面
+      isShowSkuForm: false, // 是否显示SkuForm组件界面
+
+      isLoading: false, // 是否正在加载中
+      isShowDialog: false, // 是否显示sku列表的dialog
+      spu: {}, // 要显示sku列表的spu对象
+      skuList: [], // 指定spu下的sku列表
     }
   },
 
@@ -78,6 +98,27 @@ export default {
 
   methods: {
 
+    /* 
+    显示指定SPU下的SKU列表
+    */
+    async showSkuList (spu) {
+
+      // 更新一个数据
+      this.isShowDialog = true
+      this.spu = spu
+      this.skuList = [] // 重置一下前面显示的列表数据
+      this.isLoading = true // 显示loading
+
+      // 请求获取sku列表显示
+      const result = await this.$API.sku.getListBySpuId(spu.id)
+      this.isLoading = false // 隐藏loading
+      const skuList = result.data
+      this.skuList = skuList
+    },
+
+    /* 
+    保存spu成功的监听回调
+    */
     handleSuccess () {
       // 需要区别是添加还是更新
       this.getSpuList(this.spuId ? this.page : 1)
@@ -85,6 +126,9 @@ export default {
       this.spuId = null
     },
 
+    /* 
+    取消SPU保存的回调
+    */
     handleCancel () {
       // 清除spuID
       this.spuId = null
@@ -161,7 +205,8 @@ export default {
   },
 
   components: {
-    SpuForm
+    SpuForm,
+    SkuForm
   }
 }
 </script>
