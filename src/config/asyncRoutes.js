@@ -10,6 +10,8 @@ const Order = () => import('@/views/order/list')
 const Login = () => import('@/views/login/index')
 const ClientUser = () => import('@/views/user/index')
 const Category = () => import('@/views/category/list')
+const Scoped = () => import('@/views/test/scoped')
+
 
 export default {
   User: {
@@ -59,5 +61,10 @@ export default {
   Category: {
     path: 'list',
     component: Category,
-  }
+  },
+
+  Scoped: {
+    path: 'scoped',
+    component: Scoped,
+  },
 }
