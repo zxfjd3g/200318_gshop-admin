@@ -15,9 +15,16 @@
         prop="path"
         label="访问路径"
       />
+     <!--  <el-table-column
+        label="图标"
+      >
+        <template v-slot="{row}">
+          <svg-icon :icon-class="svgNames[row.icon]" v-if="row.icon"/>
+        </template>
+      </el-table-column> -->
       <el-table-column
         prop="component"
-        label="组件路径"
+        label="组件"
       />
       <el-table-column
         prop="permissionValue"
@@ -62,18 +69,21 @@
     </el-table>
 
     <el-dialog :visible.sync="dialogPermissionVisible" 
-      :title="dialogTitle">
+      :title="dialogTitle" @close="resetData">
 
       <el-form ref="permission" :model="permission" :rules="permissionRules" label-width="120px">
         <el-form-item label="名称" prop="name">
           <el-input v-model="permission.name"/>
         </el-form-item>
-        <el-form-item label="访问路径" prop="path">
-          <el-input v-model="permission.path"/>
+        <el-form-item label="访问路径" prop="path" v-if="permission.level!==1">
+          <el-input v-model="permission.path" :disabled="permission.level!==2"/>
         </el-form-item>
         
-        <el-form-item label="组件路径" prop="component">
-          <el-input v-model="permission.component"/>
+        <el-form-item label="组件" prop="component" v-if="permission.level!==1">
+          <el-input v-model="permission.component" disabled v-if="permission.level===2"/>
+          <el-select v-model="permission.component" v-else @change="handleComponentChange">
+            <el-option :value="name" :label="name" v-for="name in asyncRouteNames" :key="name"></el-option>
+          </el-select>
         </el-form-item>
 
         <el-form-item label="功能权限值" prop="permissionValue" v-if="permission.level===4">
@@ -103,6 +113,7 @@
 
 <script>
 import svgNames from '@/icons'
+import asyncRoutes from '@/config/asyncRoutes'
 
 // 菜单权限校验的规则
 const menuRules = { 
@@ -127,7 +138,9 @@ export default {
       expandKeys: [], // 需要自动展开的项
       dialogPermissionVisible: false, // 是否显示菜单权限的Dialog
       permission: { // 要操作的菜单权限对象
-        level: 0
+        level: 0,
+        component: '',
+        path: ''
       }, 
     }
   },
@@ -154,7 +167,11 @@ export default {
       } else {
         return menuRules
       }
-    }
+    },
+
+    asyncRouteNames () {
+      return Object.keys(asyncRoutes)
+    },
   },
   
   mounted () {
@@ -162,6 +179,10 @@ export default {
   },
 
   methods: {
+
+    handleComponentChange (value) {
+      this.permission.path = asyncRoutes[value].path
+    },
 
     /* 
     根据级别得到要显示的添加dialog的标题
@@ -191,6 +212,11 @@ export default {
       this.dialogPermissionVisible = true
       this.permission.pid = row.id
       this.permission.level = row.level + 1
+      if (this.permission.level===2) {
+        this.permission.component = 'Layout'
+      } else {
+        this.permission.component = ''
+      }
       this.permission.type = this.permission.level===4 ? 2 : 1
 
       // 清除校验(必须在界面更新之后)
@@ -250,7 +276,9 @@ export default {
     resetData() {
       this.dialogPermissionVisible = false
       this.permission = {
-        level: 0
+        level: 0,
+        component: '',
+        path: ''
       }
     }
   }

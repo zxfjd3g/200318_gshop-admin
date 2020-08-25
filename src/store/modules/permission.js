@@ -1,6 +1,7 @@
 import { constantRoutes, lastRoute } from '@/router'
 import { login as loginAPI} from '@/api'
 import Layout from '@/layout'
+import asyncRoutes from '@/config/asyncRoutes'
 
 /*
 根据路由权限列表生成路由列表
@@ -12,16 +13,24 @@ function generateAsyncRoutes(permissionList) {
     // 得到路由组件名称字符串
     let component = route.component
     if (component) {
-      if (component!=="Layout" && component.indexOf('/')!==0) {
-        component = '/' + component
-      }
-      try {
-        // 指定路由的组件
-        route.component = component === 'Layout' ? Layout : () => import(`@/views${component}.vue`)
-      } catch (e) { // 如果对应的组件不存在, 排除它
-        console.log(e)
+      if (component==='Layout') {
+        route.component = Layout
+      } else if (asyncRoutes[component]) {
+        route.component = asyncRoutes[component].component
+      } else {
         return false
       }
+
+      // if (component!=="Layout" && component.indexOf('/')!==0) {
+      //   component = '/' + component
+      // }
+      // try {
+      //   // 指定路由的组件
+      //   route.component = component === 'Layout' ? Layout : () => import(`@/views${component}.vue`)
+      // } catch (e) { // 如果对应的组件不存在, 排除它
+      //   console.log(e)
+      //   return false
+      // }
     }
     // 如果有子路由, 递归调用
     if (route.children && route.children.length) {
