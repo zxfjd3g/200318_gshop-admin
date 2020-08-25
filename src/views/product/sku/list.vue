@@ -230,9 +230,9 @@ export default {
   */
   .sku-list {
     .el-row {
-      height: 40px;
+      height: 60px;
       .el-col {
-        line-height: 40px;
+        line-height: 60px;
         &.el-col-5 {
           font-size: 18px;
           font-weight: bold;

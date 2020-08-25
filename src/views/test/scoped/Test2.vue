@@ -9,6 +9,7 @@
     
     <br>
     <Test3></Test3>
+   
     <br>
     <Test4/>
   </div>
@@ -25,3 +26,30 @@ export default {
   }
 }
 </script>
+
+<style>
+  /* h2 {
+    color: red;
+  } */
+  .test2 .t2 {
+    color: blue
+  }
+</style> 
+
+<style scoped>
+  .test2 .t2 {
+    color: green;
+  }
+
+  .test2 >>> .t22 {
+    font-size: 12px;
+  }
+</style>
+
+<style lang="scss" scoped>
+  .test2 {
+    /deep/ .t22 {
+      color: pink;
+    }
+  }
+</style>
