@@ -15,13 +15,13 @@
         prop="path"
         label="访问路径"
       />
-     <!--  <el-table-column
+      <el-table-column
         label="图标"
       >
         <template v-slot="{row}">
-          <svg-icon :icon-class="svgNames[row.icon]" v-if="row.icon"/>
+          <svg-icon :icon-class="row.icon" v-if="row.icon"/>
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <el-table-column
         prop="component"
         label="组件"
