@@ -1,7 +1,8 @@
 <template>
   <div>
+    <h2>测试按钮权限</h2>
     <button v-if="$hasBP('test.add')">添加</button>
-    <button v-if="$hasBP('test.update')">更新</button>
+    <button v-if="$hasBP('test.button.add')">更新</button>
   </div>
 </template>
 

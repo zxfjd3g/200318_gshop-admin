@@ -11,6 +11,7 @@ const Login = () => import('@/views/login/index')
 const ClientUser = () => import('@/views/user/index')
 const Category = () => import('@/views/category/list')
 const Scoped = () => import('@/views/test/scoped')
+const TestList = () => import('@/views/test/list')
 
 
 export default {
@@ -65,6 +66,24 @@ export default {
 
   Scoped: {
     path: 'scoped',
-    component: Scoped,
+    component: Scoped
+  },
+  TestList: {
+    path: 'list',
+    component: TestList
   },
 }
+
+
+/* 
+{
+  path: '/test',
+  component: Layout,
+  children: [
+    {
+      path: 'scoped'
+      component: Scoped
+    }
+  ]
+}
+*/

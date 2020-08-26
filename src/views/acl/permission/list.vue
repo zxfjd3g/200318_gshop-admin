@@ -46,6 +46,7 @@
 
           <HintButton
             v-if="$hasBP('permission.update')"
+            :disabled="row.level===1"
             type="primary"
             icon="el-icon-edit"
             size="mini"

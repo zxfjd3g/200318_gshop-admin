@@ -77,7 +77,7 @@
         var ids = this.$refs.tree.getCheckedKeys().join(",")
         /* 
         vue elementUI tree树形控件获取父节点ID的实例
-        node_modules\element-ui\lib\element-ui.common.js    25377行修改源码 
+        node_modules\element-ui\lib\tree.js    1051行修改源码 
         // if ((child.checked || includeHalfChecked && child.indeterminate) && (!leafOnly || leafOnly && child.isLeaf)) {
         if ((child.checked || child.indeterminate) && (!leafOnly || leafOnly && child.isLeaf)) {
         */
