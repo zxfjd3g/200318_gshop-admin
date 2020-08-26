@@ -121,6 +121,7 @@ export default {
             this.loading = false
           }).catch(() => {
             this.loading = false
+            this.$message.error('登陆失败!')
           })
         }
       })

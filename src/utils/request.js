@@ -12,6 +12,7 @@ import axios from 'axios'
 import { Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+const _Message = Message  // 一旦对element-ui进行按需引入打包就必须处理, 否则会出:_Message没有定义的错误
 
 // 创建一个新的axios
 const service = axios.create({
@@ -40,9 +41,10 @@ service.interceptors.response.use(
     */
     if (result.code !== 20000 && result.code !== 200) {
       if (result.code===201) { // 删除商品相关的系统数据时, 错误信息保存在了data上
-        Message.error(result.data || '未知错误')
+        _Message.error(result.data || '未知错误')
       } else {
-        Message.error(result.message || '未知错误')
+        console.log('------')
+        _Message.error(result.message || '未知错误')
       }
 
       // 返回了一个失败的promise
@@ -56,7 +58,7 @@ service.interceptors.response.use(
   error => {
     console.log('err' + error)
     // 统一显示错误提示
-    Message({
+    _Message({
       message: error.message || '请求出错了',
       type: 'error',
       duration: 5 * 1000
