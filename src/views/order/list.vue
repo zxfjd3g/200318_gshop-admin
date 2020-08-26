@@ -115,8 +115,8 @@ export default {
     */
     times (value) {
       if (value.length===2) {
-        this.searchObj.createTimeBegin = value[0]
-        this.searchObj.createTimeEnd = value[1]
+        this.tempSearchObj.createTimeBegin = value[0]
+        this.tempSearchObj.createTimeEnd = value[1]
       }
     }
   },

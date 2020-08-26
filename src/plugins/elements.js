@@ -49,7 +49,7 @@ import {
   RadioGroup,
   RadioButton,
   // CheckboxButton,
-  // CheckboxGroup,
+  CheckboxGroup,
   // Switch,
   // OptionGroup,
   // ButtonGroup,
@@ -136,6 +136,7 @@ Vue.use(Loading.directive);
 // Vue.use(Radio);
 Vue.use(RadioGroup);
 Vue.use(RadioButton);
+Vue.use(CheckboxGroup);
 // Vue.use(CheckboxButton);
 // Vue.use(Switch);
 // Vue.use(OptionGroup);
