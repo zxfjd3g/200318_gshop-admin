@@ -98,7 +98,7 @@ export function resetRouter() {
   // 重新生成只包含常量路由的路由器
   const newRouter = createRouter()
 
-  // 重置路由器的matcher(只包含常量路由)
+  // 重置路由器的matcher(只包含常量路由, 替换登陆生成的所有路由)
   router.matcher = newRouter.matcher 
 }
 
