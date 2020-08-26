@@ -58,31 +58,28 @@ const actions = {
   异步获取用户信息
   */
   getInfo({ commit }) {
-    return new Promise((resolve, reject) => {
-      loginAPI.getInfo().then(result => {
-        const { data } = result
+    return loginAPI.getInfo().then(result => {
+      const { data } = result
 
-        if (!data) {
-          reject('Verification failed, please Login again.')
-        }
+      if (!data) {
+        reject('Verification failed, please Login again.')
+      }
 
-        const { name, avatar, roles, permissionValueList } = data
+      const { name, avatar, roles, permissionValueList } = data
 
-        commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+      commit('SET_NAME', name)
+      commit('SET_AVATAR', avatar)
 
-        if (roles && roles.length > 0) { // 验证返回的roles是否是一个非空数组
-          commit('SET_ROLES', roles)
-        } else {
-          reject('getInfo: roles must be a non-null array !')
-        }
+      if (roles && roles.length > 0) { // 验证返回的roles是否是一个非空数组
+        commit('SET_ROLES', roles)
+      } else {
+        reject('getInfo: roles must be a non-null array !')
+      }
 
-        commit('SET_BUTTONS', permissionValueList)
+      commit('SET_BUTTONS', permissionValueList)
 
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
+      // resolve(data)
+      return data
     })
   },
 

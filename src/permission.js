@@ -37,7 +37,7 @@ router.beforeEach(async(to, from, next) => {
       } else { // 如果还没有登陆
         try {
           // 异步请求获取用户信息
-          await store.dispatch('user/getInfo')
+          store.dispatch('user/getInfo')
           // 成功后, 请求获取当前用户的所有权限路由数组
           const asyncRoutes = await store.dispatch('permission/generateRoutes')
           // 动态添加可访问的路由, 注意将lastRoute放在最后

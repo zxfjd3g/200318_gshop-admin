@@ -31,6 +31,8 @@ function generateAsyncRoutes(permissionList) {
       //   console.log(e)
       //   return false
       // }
+    } else {
+      return false
     }
     // 如果有子路由, 递归调用
     if (route.children && route.children.length) {
