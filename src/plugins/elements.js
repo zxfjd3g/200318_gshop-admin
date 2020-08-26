@@ -88,6 +88,7 @@ import {
   // CascaderPanel,
 } from 'element-ui';
 
+// import {Scrollbar} from 'element-ui' // 不能这样引入
 import Scrollbar from 'element-ui/lib/scrollbar' // 必须单独引入
 
 // 必须定义在一个新的变量 ==> 否则会抛出_MessageBox is define的bug
