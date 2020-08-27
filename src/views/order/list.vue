@@ -68,7 +68,7 @@
 
       <el-table-column label="操作" width="150" align="center">
         <template slot-scope="{row, $index}">
-          <hint-button v-if="$hasBP('order.detail')" title="查看"  size="mini" type="primary" icon="el-icon-thumb" circle></hint-button>
+          <hint-button v-if="$hasBP('order.detail2')" title="查看"  size="mini" type="primary" icon="el-icon-thumb" circle></hint-button>
           <hint-button v-if="$hasBP('order.update')" title="修改" size="mini" type="primary" icon="el-icon-edit" circle></hint-button>
           <hint-button v-if="$hasBP('order.delete')" title="删除" size="mini" type="danger" icon="el-icon-delete" circle></hint-button>
         </template>
