@@ -1,5 +1,8 @@
 <template>
-  <ve-line :data="chartData" ref="chart"></ve-line>
+  <div>
+    <button @click="update">更新</button>
+    <ve-line :data="chartData" ref="chart"></ve-line>
+  </div>
 </template>
 
 <script>
@@ -19,6 +22,21 @@
             { '日期': '1/6', '访问用户': 4593, '下单用户': 4293, '下单率': 0.78 }
           ]
         }
+      }
+    },
+
+    methods: {
+      // 更新图表数据
+      update () {
+        this.chartData.rows.push({ 
+          '日期': '1/7', 
+          '访问用户': 4593, 
+          '下单用户': 4293, 
+          '下单率': 0.78 
+        })
+        
+        const row = this.chartData.rows[0]
+        row['访问用户'] += 200
       }
     }
   }
